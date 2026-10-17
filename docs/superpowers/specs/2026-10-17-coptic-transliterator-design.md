@@ -3,6 +3,8 @@
 Date: 2026-10-17
 Status: Approved in conversation; awaiting written-spec review
 
+Sections 1–12 describe the full product. It is delivered in iterations, and section 13 defines what each one contains. **Only iteration 1 is being planned and built now.**
+
 ## 1. Intent
 
 A free public web page where someone pastes Bohairic Coptic text and gets back a Latin-letter transliteration they can read aloud. The main users are people reading or pronouncing Coptic during liturgy, usually on a phone.
@@ -24,7 +26,7 @@ Inputs are short: a word, a response, or one hymn verse.
 | Spelling | English-friendly digraphs, no diacritics |
 | Input size | Up to 1,000 code points per request |
 | Engine | Google Gemini via `@google/genai`, constrained by the prompt and the output checks |
-| Reference data | Claude writes 30 pairs from standard Greco-Bohairic rules; the user spot-checks them before use |
+| Reference data | Iteration 1: 10 pairs Claude writes from standard Greco-Bohairic rules. Iteration 2: grown to 30 from real misses. The user spot-checks every pair before use |
 | Stack | Next.js (App Router), React, Tailwind CSS, TypeScript, npm, Vitest |
 | Hosting | Vercel Hobby, stateless |
 
@@ -125,7 +127,7 @@ The user text goes into the request between fixed delimiters (for example `<copt
 
 ### Model call (`lib/gemini.ts`)
 
-- The model ID is one exported constant, chosen with the evaluation script (section 9). The candidates are `gemini-3.1-flash-lite` and `gemini-3-flash`.
+- The model ID is one exported constant. Iteration 1 uses `gemini-3.5-flash-lite`. Iteration 2 compares it with a current Flash model using the evaluation script (section 9), and that model is confirmed when iteration 2 is planned.
 - temperature 0
 - JSON output with the response schema `{ latin: string }`, required
 - `maxOutputTokens` = 64 + 2 × the input length, capped at 2,048
@@ -185,7 +187,7 @@ Out of scope: an on-screen Coptic keyboard, history, saved texts, shareable link
 
 ### Reference set (`data/reference.json`)
 
-- 30 pairs written by Claude from standard Greco-Bohairic rules: 18 `example` and 12 `heldout`.
+- 30 pairs: the 10 iteration-1 examples, the misses recorded while testing iteration 1 (with the user's corrections), and pairs Claude writes from standard Greco-Bohairic rules to fill gaps. Split into 18 `example` and 12 `heldout`, with misses favoured for `heldout`.
 - They cover Greek loanwords, ⲟⲩ, ⲁⲩ/ⲉⲩ, ϯ, ϭ, ϫ, ϧ, the jinkim, multi-line input, and common liturgical responses.
 - **Gate:** the user spot-checks the set before it is used in the prompt or in evaluation.
 
@@ -196,7 +198,7 @@ Out of scope: an on-screen Coptic keyboard, history, saved texts, shareable link
   - **exact match:** equal after trimming, collapsing whitespace, and ignoring case
   - **per-character accuracy:** 1 − Levenshtein distance ÷ reference length, averaged over the pairs
 - **Launch bar:** ≥80% exact match and ≥95% per-character accuracy on the held-out pairs, and the user reviews every miss.
-- **Model choice:** run both candidate models. Pick the higher scorer that meets the bar, or `gemini-3.1-flash-lite` on a tie. If neither meets the bar, stop and revisit the rules-engine alternative before launch.
+- **Model choice:** run both candidate models. Pick the higher scorer that meets the bar, or `gemini-3.5-flash-lite` on a tie. If neither meets the bar, stop and revisit the rules-engine alternative before launch.
 
 ## 10. Development under the isolation setup
 
@@ -205,10 +207,11 @@ The repository's isolation rules (see `CLAUDE.md`) apply to this work:
 - **Claude never reads the API key.** It lives in `.env.local`, which is gitignored and covered by a `Read` deny rule. The user runs commands that need the key, `npm run dev` and `npm run eval`, with the `!` prefix.
 - **Sandboxed commands need network access to `registry.npmjs.org`** (installs) and to `fonts.googleapis.com` / `fonts.gstatic.com` (builds). These are added to `.claude/settings.json` only with the user's approval. `npm test` needs no network; `next build` needs only the font hosts.
 - **`create-next-app` refuses non-empty directories,** so the project is scaffolded by hand or generated in a subfolder of the repository and moved up. Nothing is written outside the repository.
+- **The sandbox blocks all writes inside `.git`,** so the user runs every git write (`add`, `commit`, `push`) with the `!` prefix. Plans list these as user steps, with the exact command.
 
 ## 11. Deployment
 
-1. `git init` the repository (done along with this spec).
+1. `git init` the repository (done; the branch is `main`).
 2. The user creates the GitHub repository and pushes, or Claude does so only on the user's explicit instruction.
 3. The user imports the repository into a new Vercel project.
 4. The user creates `GEMINI_API_KEY` in Google AI Studio, in a project with billing disabled, and adds it under Vercel → Environment Variables. It never gets a `NEXT_PUBLIC_` prefix.
@@ -219,7 +222,67 @@ The README covers steps 2–6 and the no-billing requirement.
 
 ## 12. To verify during planning
 
-- The exact Gemini model IDs, their free-tier limits, and how `@google/genai` sets temperature, response schema, thinking level, abort signal, and the 429 retry delay.
-- Whether Vercel Hobby offers Firewall rate-limit rules, and the current Hobby `maxDuration` ceiling (keep `60` unless it's unsupported).
-- Whether the `Read` deny rule on `.env.local` stops `next build` or `vitest` from running in the sandbox. If it does, choose between moving the env loading or having the user run those commands.
-- The current Next.js and Tailwind major versions, and that they support Node 20.19 (the version installed via asdf).
+Each item is checked when the iteration in brackets is planned.
+
+- [1] **Verified 2026-10-17.** `gemini-3.1-flash-lite` is stable but shuts down on 2027-05-07, and `gemini-3.5-flash-lite` replaces it. Both are on the free tier; per-model RPM and RPD limits are shown only in AI Studio. `gemini-3.5-flash-lite` defaults to minimal thinking and supports `minimal`. The docs don't list thinking levels for `gemini-3.1-flash-lite`. Iteration 1 therefore uses `gemini-3.5-flash-lite`. In `@google/genai` 2.30, `GenerateContentConfig` has `systemInstruction`, `temperature`, `maxOutputTokens`, `responseMimeType`, `responseJsonSchema`, `thinkingConfig.thinkingLevel` (`ThinkingLevel.MINIMAL`) and `abortSignal`. API errors carry a numeric `status`.
+- [1] **Verified 2026-10-17.** Vercel Hobby allows up to 300 seconds, so `maxDuration = 60` is supported and kept.
+- [1] Whether the `Read` deny rule on `.env.local` stops `next build` or `vitest` from running in the sandbox. This is checked in the iteration 1 plan once `.env.local` exists. If it does, the user runs those commands.
+- [1] **Verified 2026-10-17.** Next.js 16.4 needs Node ≥20.9, and Tailwind 4.3 and Vitest 4.1 support Node 20. Vitest 5 needs Node ≥22.12, so iteration 1 pins Vitest 4. `create-next-app` pins TypeScript `^5`.
+- [2] The Flash model to compare against. As of 2026-10-17, `gemini-3-flash` exists only as `gemini-3-flash-preview`, and the docs list newer stable Flash models up to `gemini-3.8-flash`.
+- [3] How `@google/genai` takes an abort signal and reports the 429 retry delay.
+- [5] Whether Vercel Hobby offers Firewall rate-limit rules.
+
+## 13. Delivery in iterations
+
+Each iteration ships to the same `.vercel.app` URL and is planned only after the previous one has been tested. What later iterations contain may change based on what earlier ones show.
+
+### Iteration 1 — the smallest testable product
+
+**Goal:** real readers can paste Coptic on a phone and get a Greco-Bohairic transliteration. This tests the riskiest assumption, that Gemini is good enough at this, before anything else is built.
+
+**Included:**
+
+- **Units:** the unit structure from section 3, minus `scripts/eval.ts`. This keeps file boundaries stable, so later iterations add code instead of restructuring it.
+  - `app/layout.tsx` loads Noto Sans Coptic.
+  - `app/page.tsx` and `app/transliterator.tsx` provide the page and the form.
+  - `app/api/transliterate/route.ts` declares `maxDuration = 60`.
+  - `lib/validate.ts` contains `validateInput` only (section 5).
+  - `lib/prompt.ts` follows section 6, minus the held-out rule, since there is no held-out split yet.
+  - `lib/gemini.ts` sets temperature 0, the JSON schema `{ latin }`, the output-token cap, minimal thinking, and `import "server-only"`.
+  - `data/reference.json` holds **10 example pairs** that the user spot-checks before they go into the prompt.
+- **Model:** `gemini-3.5-flash-lite` (one constant; see section 12).
+- **API contract:** the section 4 shapes, but only three codes:
+  - `invalid_input` (400)
+  - `rate_limited` (429)
+  - `upstream` (502), for every other failure, including unparseable Gemini output
+- **UI:**
+  - a `<textarea lang="cop">` with a label
+  - a "Transliterate" button, disabled while the input is empty or a request is running
+  - a "Transliterating…" state
+  - a read-only output area
+  - one error line: the server's `message` for `invalid_input`, "Too many requests, try again shortly." for `rate_limited`, and "Something went wrong. Please try again." for everything else, including non-JSON responses and network failures
+  - stacked layout only
+- **Safety from day one:** the server-only key, and a Google project with billing disabled (section 7, item 4).
+- **Tests (Vitest):**
+  - `validateInput`
+  - `buildPrompt` includes the rules, the delimiters and every example pair
+  - `lib/gemini.ts` with the SDK mocked: parses `{ latin }`, maps 429 to `rate_limited` and everything else to `upstream`, and sends temperature 0 and the schema
+  - the route with `lib/gemini` mocked: each of the three codes and a malformed body
+- **Deployment:** section 11, steps 2–4 and 6.
+
+**Deferred:** the evaluation script and held-out set, `validateOutput`, `bad_output` and `timeout` codes and the 25-second abort, `Retry-After`, the same-origin check and `forbidden`, client-side validation, cancelling on resubmit, Copy, the character counter, Ctrl/Cmd+Enter, side-by-side layout, dark mode, `aria-live`, the Firewall rule, and the README.
+
+**How it is tested:** the user and a few readers paste real texts into the deployed page. Each wrong result is recorded as three columns: Coptic input, the output it gave, and the correct transliteration. These become the reference set in iteration 2.
+
+**Done when:** the deployed page works on a phone, at least 20 real texts have been tried, and their misses are recorded.
+
+**Decision point:** if more than half of the texts tried need corrections beyond one or two letters, revisit the rules-engine alternative (section 2) before starting iteration 2.
+
+### Later iterations
+
+| # | Adds | Trigger |
+|---|---|---|
+| 2 | `scripts/eval.ts`, a reference set grown from iteration 1's misses with the example/held-out split, prompt tuning against the launch bar (section 9), and the choice between the two models | Iteration 1 misses |
+| 3 | `validateOutput`, the `bad_output`, `timeout` and `forbidden` codes, the 25-second abort, `Retry-After`, the same-origin check, client-side validation, and cancelling on resubmit | Garbage outputs or abuse |
+| 4 | Copy, the character counter, Ctrl/Cmd+Enter, side-by-side layout, dark mode, `aria-live`, and component tests | Usability feedback |
+| 5 | The Vercel Firewall rate-limit rule (if Hobby offers it) and the README | Before sharing the link widely |
