@@ -33,7 +33,8 @@ Context rules
 - ϫ before ⲉ, ⲓ or ⲏ → j.
 - ⲭ before ⲉ, ⲓ, ⲏ or ⲩ in a Greek loanword → sh (Ⲭⲉⲣⲉ → Shere).
 - ⲇ and ⲅ keep d and g in Greek loanwords (Ⲁⲅⲓⲟⲥ → Agios).
-- Jinkim (a stroke or grave mark over a letter): on a consonant, write e before it (ⲛ̀ → en, Ⲫ̀ → Ef); on a vowel, write the vowel as usual.
+- Jinkim (a stroke or grave mark over a letter): on a consonant, write e before it (ⲛ̀ → en, Ⲫ̀ → Ef), unless the letter before it is a vowel (Ⲡⲓⲭ̀ⲣⲓⲥⲧⲟⲥ → Pikhristos); on a vowel, write the vowel as usual.
+- Ⲁⲙⲏⲛ → Amen and Ⲁⲗⲗⲏⲗⲟⲩⲓⲁ → Alleluia, as service books spell them.
 
 Formatting
 - Keep every line break, punctuation mark and space between words.

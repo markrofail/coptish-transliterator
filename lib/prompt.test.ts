@@ -37,6 +37,8 @@ describe("SYSTEM_INSTRUCTION", () => {
       "ⲏⲓ → i",
       "ⲅ before ⲅ, ⲕ, ⲝ or ⲭ → n",
       "Jinkim",
+      "unless the letter before it is a vowel",
+      "Ⲁⲙⲏⲛ → Amen",
     ]) {
       expect(SYSTEM_INSTRUCTION, rule).toContain(rule);
     }
@@ -76,7 +78,7 @@ describe("buildPrompt", () => {
   it("leaves held-out pairs out of the prompt", () => {
     const prompt = buildPrompt("ϯ", pairs);
     expect(prompt.contents).toHaveLength(3);
-    expect(JSON.stringify(prompt)).not.toContain("Ⲁⲗⲗⲏⲗⲟⲩⲓⲁ");
+    expect(JSON.stringify(prompt.contents)).not.toContain("Allilouia");
   });
 
   it("uses the system instruction and every example in data/reference.json by default", () => {
