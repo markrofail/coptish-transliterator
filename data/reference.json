@@ -1,0 +1,12 @@
+[
+  { "coptic": "Ⲡⲓⲭⲣⲓⲥⲧⲟⲥ ⲁϥⲧⲱⲛϥ\nϦⲉⲛ ⲟⲩⲙⲉⲑⲙⲏⲓ ⲁϥⲧⲱⲛϥ", "latin": "Pikhristos aftonf\nKhen oumethmi aftonf", "split": "example" },
+  { "coptic": "Ⲭⲉⲣⲉ ⲛⲉ Ⲙⲁⲣⲓⲁ", "latin": "Shere ne Maria", "split": "example" },
+  { "coptic": "Ⲁⲙⲏⲛ", "latin": "Amin", "split": "example" },
+  { "coptic": "Ⲕⲩⲣⲓⲉ ⲉ̀ⲗⲉⲏ̀ⲥⲟⲛ", "latin": "Kirie eleison", "split": "example" },
+  { "coptic": "Ⲁⲗⲗⲏⲗⲟⲩⲓⲁ", "latin": "Allilouia", "split": "example" },
+  { "coptic": "Ϯϩⲓⲣⲏⲛⲏ ⲛ̀ⲧⲉ Ⲫ̀ⲛⲟⲩϯ", "latin": "Tihirini ente Efnouti", "split": "example" },
+  { "coptic": "Ⲡ̀ϭⲟⲓⲥ ⲛⲁⲓ ⲛⲁⲛ", "latin": "Epchois nai nan", "split": "example" },
+  { "coptic": "Ⲁⲅⲓⲟⲥ ⲟ̀ Ⲑⲉⲟⲥ", "latin": "Agios o Theos", "split": "example" },
+  { "coptic": "Ⲧⲉⲛⲟⲩⲱϣⲧ ⲙ̀ⲙⲟⲕ ⲱ̀ Ⲡⲓⲭⲣⲓⲥⲧⲟⲥ", "latin": "Tenouosht emmok o Pikhristos", "split": "example" },
+  { "coptic": "Ⲑⲱⲕ ⲧⲉ ϯϫⲟⲙ", "latin": "Thok te tigom", "split": "example" }
+]
