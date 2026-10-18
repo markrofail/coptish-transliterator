@@ -123,17 +123,19 @@ Definitions:
 4. **Formatting.** Keep line breaks, punctuation and word boundaries. Copy non-Coptic text (digits, Latin letters) unchanged.
 5. **Output format.** Return only JSON matching the schema.
 
+Before the prompt is built, `lib/jinkim.ts` writes each jinkim on a consonant out as an ⲉ before it (ⲛ̀ⲧⲉ → ⲉⲛⲧⲉ), or drops it after a vowel in the same word (Ⲡⲓⲭ̀ⲣⲓⲥⲧⲟⲥ → Ⲡⲓⲭⲣⲓⲥⲧⲟⲥ), because the model kept dropping that *e*. The user's text and the examples both go through it.
+
 The few-shot examples are every pair with `"split": "example"`, given as input → output pairs. Held-out pairs never appear in the prompt, and a test enforces this.
 
 The user text goes into the request between fixed delimiters (for example `<coptic>` … `</coptic>`), never mixed into the system instruction.
 
 ### Model call (`lib/gemini.ts`)
 
-- The model ID is one exported constant. Iteration 1 uses `gemini-3.5-flash-lite`. Iteration 2 compares it with a current Flash model using the evaluation script (section 9), and that model is confirmed when iteration 2 is planned.
+- The model ID is one exported constant. Iteration 1 uses `gemini-3.5-flash-lite`. Iteration 2 compared it with `gemini-3.8-flash` using the evaluation script (section 9). 3.8-flash fixed more misses but allows only 20 free requests a day per project, so `gemini-3.5-flash-lite` stays.
 - temperature 0
 - JSON output with the response schema `{ latin: string }`, required
 - `maxOutputTokens` = 64 + 2 × the input length, capped at 2,048
-- thinking set to the minimum the model allows
+- thinking level low (iteration 1 used minimal; low scored higher in iteration 2)
 - an `AbortSignal` timeout of 25 seconds
 - no automatic retry
 
@@ -284,7 +286,7 @@ Each iteration ships to the same `.vercel.app` URL and is planned only after the
 
 | # | Adds | Trigger |
 |---|---|---|
-| 2 | `scripts/eval.ts`, a reference set grown from iteration 1's misses with the example/held-out split, prompt tuning against the launch bar (section 9), and the choice between the two models | Iteration 1 misses. **In progress** (2026-10-18): source is `test.md` (Sign of the Cross and Lord's Prayer), giving 14 example and 7 held-out pairs. First eval: `gemini-3.5-flash-lite` 57% exact / 97.9% chars at minimal and low thinking; `gemini-3.8-flash` (low) better on jinkim but adds hyphens and rate-limits. Kept flash-lite + minimal at first; then switched to `gemini-3.8-flash` at low thinking (its lowest level) at the user's request. Clean 3.8 run: 3/7 exact; about 98.7% chars on the 6 lines it returned (one 503 overloaded); the jinkim misses are fixed, but it still inserts hyphens (*ero-ou*). Caveat: several prompt rule examples use held-out words, so a clean held-out set needs new texts |
+| 2 | `scripts/eval.ts`, a reference set grown from iteration 1's misses with the example/held-out split, prompt tuning against the launch bar (section 9), and the choice between the two models | Iteration 1 misses. **In progress** (2026-10-18): source is `test.md` (Sign of the Cross and Lord's Prayer), giving 14 example and 7 held-out pairs. First eval: `gemini-3.5-flash-lite` 57% exact / 97.9% chars at minimal and low thinking; `gemini-3.8-flash` (low) better on jinkim but adds hyphens and rate-limits. Kept flash-lite + minimal at first; then switched to `gemini-3.8-flash` at low thinking (its lowest level) at the user's request. Clean 3.8 run: 3/7 exact; about 98.7% chars on the 6 lines it returned (one 503 overloaded); the jinkim misses are fixed, but it still inserts hyphens (*ero-ou*). Caveat: several prompt rule examples use held-out words, so a clean held-out set needs new texts. Then added the Annual Conclusion hymn (tasbeha 2592) as 9 more held-out pairs (16 in all). `gemini-3.8-flash` turned out to allow only 20 free requests a day per project, so it was dropped for `gemini-3.5-flash-lite`. Added the jinkim pre-pass (`lib/jinkim.ts`). On the 16 held-out lines, before → after: minimal 63%/98.0% → 63%/97.7%, low 56%/97.8% → **63%/98.5%**. The pre-pass removed every jinkim miss, and low thinking became the default. Still missing: ⲱⲟⲩ → *oou* (*pipethou*), ⲃ → *v* (*nennobi*), ⲅ → *gh* (*enagathos*), ⲭ → *k* (*kha*), a jinkim on a final vowel (ⲁⲕⲓ̀ → *akiy*) |
 | 3 | `validateOutput`, the `bad_output`, `timeout` and `forbidden` codes, the 25-second abort, `Retry-After`, the same-origin check, client-side validation, and cancelling on resubmit | Garbage outputs or abuse |
 | 4 | Copy, the character counter, Ctrl/Cmd+Enter, side-by-side layout, dark mode, `aria-live`, and component tests | Usability feedback |
 | 5 | The Vercel Firewall rate-limit rule (if Hobby offers it) and the README | Before sharing the link widely |
