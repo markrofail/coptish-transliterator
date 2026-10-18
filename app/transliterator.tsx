@@ -167,7 +167,11 @@ export function Transliterator() {
   }
 
   return (
-    <div className="grid gap-[22px] md:grid-cols-[minmax(0,1fr)_248px] md:items-start md:gap-[58px]">
+    // Empty onClick: iOS Safari then sends clicks for taps on plain text, which close the chooser.
+    <div
+      onClick={() => {}}
+      className="grid gap-[22px] md:grid-cols-[minmax(0,1fr)_248px] md:items-start md:gap-[58px]"
+    >
       <div ref={columnRef} className="min-w-0">
         <Composer
           text={text}
