@@ -34,7 +34,7 @@ function plain(words: readonly string[]): Token[] {
 }
 
 // For each base word, the index of the other reading's word matched to it, or -1. Matches follow a
-// longest common subsequence of keys, taken left to right so repeated words pair up in order.
+// longest common subsequence of keys, taken left to right.
 function align(base: readonly string[], other: readonly string[]): number[] {
   // remaining[i][j] is the LCS length of base[i..] and other[j..].
   const remaining = Array.from({ length: base.length + 1 }, () => new Array<number>(other.length + 1).fill(0));
@@ -51,6 +51,11 @@ function align(base: readonly string[], other: readonly string[]): number[] {
     if (base[i] === other[j]) {
       // Equal keys always keep the LCS length, by the recurrence above.
       matches[i] = j;
+      i++;
+      j++;
+    } else if (remaining[i + 1][j + 1] === remaining[i][j]) {
+      // Pair differing words as a substitution when that costs no match, so a differing first
+      // word among repeats doesn't shift the matches and leave a span at each end.
       i++;
       j++;
     } else if (remaining[i + 1][j] > remaining[i][j + 1]) {

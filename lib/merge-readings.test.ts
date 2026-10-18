@@ -234,6 +234,24 @@ describe("mergeReadings", () => {
       ],
     ]);
   });
+
+  it("aligns repeated words when the first one differs", () => {
+    const merged = mergeReadings({ 1: "Amen Amen Amen", 2: "Amin Amen Amen", 3: "Amen Amen Amen" }, 1);
+    expect(merged.lines).toEqual([
+      [
+        {
+          kind: "span",
+          id: "0:0",
+          alternatives: [
+            { text: "Amen", readings: [1, 3] },
+            { text: "Amin", readings: [2] },
+          ],
+        },
+        w("Amen"),
+        w("Amen"),
+      ],
+    ]);
+  });
 });
 
 describe("lineText and mergedText", () => {
