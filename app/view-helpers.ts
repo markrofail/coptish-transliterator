@@ -55,7 +55,7 @@ export function readingsNote(mergedCount: number, spans: number, chosen: number)
   if (mergedCount === 1) return "1 of 3 readings came back";
   const prefix = mergedCount === 2 ? "2 of 3 readings came back · " : "";
   if (spans === 0) return mergedCount === 2 ? `${prefix}they agree` : "All 3 readings agree";
-  if (chosen > 0) return `${chosen} of ${spans} chosen`;
+  if (chosen > 0) return `${prefix}${chosen} of ${spans} chosen`;
   const disagree =
     spans === 1
       ? "1 word where the readings disagree · tap it to choose"

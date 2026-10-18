@@ -75,6 +75,7 @@ describe("readingsNote", () => {
     expect(readingsNote(3, 1, 0)).toBe("1 word where the readings disagree · tap it to choose");
     expect(readingsNote(3, 2, 1)).toBe("1 of 2 chosen");
     expect(readingsNote(2, 1, 0)).toBe("2 of 3 readings came back · 1 word where the readings disagree · tap it to choose");
+    expect(readingsNote(2, 2, 1)).toBe("2 of 3 readings came back · 1 of 2 chosen");
     expect(readingsNote(2, 0, 0)).toBe("2 of 3 readings came back · they agree");
     expect(readingsNote(1, 0, 0)).toBe("1 of 3 readings came back");
   });
