@@ -1,7 +1,7 @@
 # Three Readings — Design
 
 Date: 2026-10-18
-Status: Approved by the user on 2026-10-18
+Status: Implemented (approved by the user on 2026-10-18)
 
 This document changes the API contract (section 4) and the model call (section 6) of `2026-10-17-coptic-transliterator-design.md`, and the Output section of `2026-10-18-page-redesign-design.md`. Everything else in those two documents stands.
 
