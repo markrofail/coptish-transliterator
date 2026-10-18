@@ -102,7 +102,7 @@ Unit-test this module thoroughly. It is where most of the subtle behavior lives.
 
 - Submitting, or pressing an example, sends three `POST /api/transliterate` requests at once, with `reading` 1, 2 and 3 (my call: the browser sends them, so each dot reflects a real request).
 - They share one `AbortController`. Submitting again, pressing another example, or Clear cancels all three, as today.
-- **Waiting for stragglers (my call).** The text appears when all three are back. If two are back and the third is still running 10 seconds after the first returned, stop waiting: count it as failed, ignore its reply if it arrives later, and show what's back. This keeps one slow request from holding up the rest. (Its Gemini call is already paid for, so aborting it would save nothing.)
+- **Waiting for stragglers (my call).** The text appears when all three are back. If two are back, at least one of them with a reading, and the third is still running 10 seconds after the first reading arrived, stop waiting: count it as failed, ignore its reply if it arrives later, and show what's back. This keeps one slow request from holding up the rest. (Its Gemini call is already paid for, so aborting it would save nothing.)
 - **All three fail:** show today's error UI and Try again. Use the rate-limited message if any request was rate-limited, otherwise the existing generic message.
 
 ### Header and dots
