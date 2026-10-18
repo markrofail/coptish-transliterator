@@ -1,7 +1,7 @@
 # Page Redesign — Design
 
 Date: 2026-10-18
-Status: Builder check done; awaiting the user's approval
+Status: Approved by the user on 2026-10-18
 
 This document replaces section 8 (UI) of `2026-10-17-coptic-transliterator-design.md`. It also replaces that spec's "Input size" decision and the UI items in its iteration 4 row (Copy, counter, Ctrl/Cmd+Enter, side-by-side layout, dark mode). The API contract, prompt, model, and abuse protection are unchanged except where section 6 says otherwise.
 
