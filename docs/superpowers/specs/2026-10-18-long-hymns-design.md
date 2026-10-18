@@ -158,7 +158,15 @@ At 4,000 characters or fewer, everything is exactly as today: no parts, no new l
   - keyboard use
   - reduced motion
 - **One real run** with the user's example hymn (tasbeha.org 1286, about 9,000 characters): all three parts through the live pipeline, 9 requests in total. Record the parts' sizes, each part's time, and each reading's line count against its part's.
-  - Measured 2026-10-18: the hymn is 9,000 characters, 81 stanzas and 324 lines, in 3 parts of 3,012, 2,999 and 2,985 characters (134 lines each, blank separators included). Parts took about 7.6 s, 5.6 s and 6.0 s from press to text, with single readings taking 3.6 to 4.2 s. Every reading I recorded came back with its part's 134 lines (parts 2 and 3 in full; part 1's third reading), no part was incomplete, and Copy all gave 81 stanzas.
+  - Measured 2026-10-18: the hymn is 9,000 characters, 81 stanzas and 324 lines.
+    - It split into 3 parts of 3,012, 2,999 and 2,985 code points, 134 lines each, blank separators included.
+    - The parts took 7.6 s, 5.6 s and 6.0 s from press to text.
+    - Single readings took 3.6 to 5.2 s each; the server log's ms values were 3947, 4072, 5163, 3586, 3714, 3875, 4087, 4223 and 4223.
+    - No part was incomplete.
+    - Copy all gave 81 stanzas, with exactly 9 requests in total.
+    - Part 1 had 94 marks and part 2 had 83. Most were names, and about 27 per part were the same refrain disagreement repeated in each stanza.
+    - In part 3, all three readings had the right 134 lines, but two were left out by the plain-Latin filter. Part 3 therefore showed reading 1 alone, unmarked, with "1 of 3 readings came back".
+    - Part 1's readings 1 and 2 line counts were not captured.
   - **Stop rule (my call):** if any part comes back incomplete, stop and bring the numbers to the user, rather than tuning part sizes without them.
 - **`npm test` and `npm run build`** both pass.
 

@@ -111,7 +111,7 @@ For a paste over 4,000 characters, the counter and the button now follow `2026-1
   - a **Clear** ghost button
   - the **Transliterate** primary button: ink background, white text, 8px radius, 44px tall, with a right-arrow icon
 - **Appearing:** the hint, Clear, and Transliterate are hidden while the box is empty or only whitespace. When text appears they fade in and rise 6px over 200ms with the DESIGN.md easing, and they reverse when the box is emptied.
-- **Counter:** hidden until 80% of the limit (3,200 of 4,000). It then shows "3,412 / 4,000" in mono. Over the limit it turns ink with an underline.
+- **Counter:** appears only once a paste is over 4,000 characters. It then counts against 16,000 and shows the number of parts, e.g. "9,000 / 16,000 · 3 parts", in mono (see `2026-10-18-long-hymns-design.md` section 6). Over the limit it turns ink with an underline.
 - Ctrl/Cmd+Enter submits.
 - **Autofocus:** only on devices with a fine pointer, so a phone keyboard doesn't pop up on load (my call).
 
