@@ -58,7 +58,7 @@ The user also approved the behaviour as played back: optional settling, live fol
 - **Per request:** 4,000 code points, unchanged. That's `MAX_INPUT_LENGTH` in `lib/validate.ts`, and the server keeps enforcing it.
 - **Per paste, on the page: 16,000 code points** (my call). That's about 2,000 words, or four parts. The user's example fits with room to spare.
 - **Counting:** both limits count code points after trimming, as `validateInput` does today.
-- **Over 16,000:** the existing message format, with the new number: "That's N characters. The limit is 16,000, so try a shorter passage."
+- **Over 16,000:** the existing message format, with the new number and no thousands separator, as today: "That's 16001 characters. The limit is 16000, so try a shorter passage."
 - **The Coptic check** ("This doesn't look like Unicode Coptic…") runs once, on the whole paste, before anything is sent.
 
 ## 5. Splitting (`lib/split-parts.ts`, pure)
