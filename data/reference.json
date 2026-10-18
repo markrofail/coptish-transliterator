@@ -19,5 +19,14 @@
   {"coptic": "Ⲟⲩⲟϩ ⲙ̀ⲡⲉⲣⲉⲛⲧⲉⲛ ⲉϧⲟⲩⲛ ⲉ̀ⲡⲓⲣⲁⲥⲙⲟⲥ: ⲁⲗⲗⲁ ⲛⲁϩⲙⲉⲛ ⲉⲃⲟⲗϩⲁ ⲡⲓⲡⲉⲧϩⲱⲟⲩ:", "latin": "Ouoh emperenten ekhoun epirasmos: alla nahmen evolha pipethoou:", "split": "heldout"},
   {"coptic": "Ϧⲉⲛ Ⲡⲭ̅ⲥ̅ Ⲓⲏ̅ⲥ̅ Ⲡⲉⲛⲟ̅ⲥ̅.", "latin": "Khen Pikhristos Isos Penchois.", "split": "heldout"},
   {"coptic": "Ϫⲉ ⲑⲱⲕ ⲧⲉ ϯⲙⲉⲧⲟⲩⲣⲟ ⲛⲉⲙ ϯϫⲟⲙ", "latin": "Je thok te timetouro nem tigom", "split": "heldout"},
-  {"coptic": "ⲛⲉⲙ ⲡⲓⲱⲟⲩ ϣⲁ ⲉⲛⲉϩ. Ⲁⲙⲏⲛ.", "latin": "nem pioou sha eneh. Amen.", "split": "heldout"}
+  {"coptic": "ⲛⲉⲙ ⲡⲓⲱⲟⲩ ϣⲁ ⲉⲛⲉϩ. Ⲁⲙⲏⲛ.", "latin": "nem pioou sha eneh. Amen.", "split": "heldout"},
+  {"coptic": "Ϩⲓⲧⲉⲛ ⲛⲓⲡ̀ⲣⲉⲥⲃⲓⲁ:", "latin": "Hiten nipresvia:", "split": "heldout"},
+  {"coptic": "ⲛ̀ⲧⲉ Ϯⲑⲉⲟ̀ⲧⲟⲕⲟⲥ ⲉⲑⲟⲩⲁⲃ Ⲙⲁⲣⲓⲁ:", "latin": "ente Titheotokos ethouab Maria:", "split": "heldout"},
+  {"coptic": "Ⲡ̀ϭⲟⲓⲥ ⲁ̀ⲣⲓϩ̀ⲙⲟⲧ ⲛⲁⲛ:", "latin": "Epchois arihmot nan:", "split": "heldout"},
+  {"coptic": "ⲙ̀ⲡⲓⲭⲱ ⲉ̀ⲃⲟⲗ ⲛ̀ⲧⲉ ⲛⲉⲛⲛⲟⲃⲓ.", "latin": "empiko evol ente nennovi.", "split": "heldout"},
+  {"coptic": "Ⲉⲑⲣⲉⲛϩⲱⲥ ⲉ̀ⲣⲟⲕ:", "latin": "Ethrenhos erok:", "split": "heldout"},
+  {"coptic": "ⲛⲉⲙ Ⲡⲉⲕⲓⲱⲧ ⲛ̀ⲁ̀ⲅⲁⲑⲟⲥ:", "latin": "nem Pekyot enaghathos:", "split": "heldout"},
+  {"coptic": "ⲛⲉⲙ Ⲡⲓⲡ̀ⲛⲉⲩⲙⲁ Ⲉⲑⲟⲩⲁⲃ:", "latin": "nem Pipnevma Ethouab:", "split": "heldout"},
+  {"coptic": "ϫⲉ (ⲁⲕⲓ̀) ⲁⲕⲥⲱϯ ⲙ̀ⲙⲟⲛ.", "latin": "je (aki) aksoti emmon.", "split": "heldout"},
+  {"coptic": "Ⲛⲁⲓ ⲛⲁⲛ.", "latin": "Nai nan.", "split": "heldout"}
 ]

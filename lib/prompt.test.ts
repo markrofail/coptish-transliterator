@@ -6,10 +6,10 @@ import { validateInput } from "@/lib/validate";
 const NON_LATIN = /[Ͱ-ϿⲀ-⳿]/u;
 
 describe("data/reference.json", () => {
-  it("holds 14 example and 7 held-out pairs of valid Coptic and Coptic-free Latin", () => {
+  it("holds 14 example and 16 held-out pairs of valid Coptic and Coptic-free Latin", () => {
     const pairs = reference as ReferencePair[];
     expect(pairs.filter((pair) => pair.split === "example")).toHaveLength(14);
-    expect(pairs.filter((pair) => pair.split === "heldout")).toHaveLength(7);
+    expect(pairs.filter((pair) => pair.split === "heldout")).toHaveLength(16);
     for (const pair of pairs) {
       expect(validateInput(pair.coptic).ok, pair.coptic).toBe(true);
       expect(pair.latin, pair.latin).not.toMatch(NON_LATIN);
@@ -28,6 +28,8 @@ describe("data/reference.json", () => {
       "Khen efran emefyot",
       "Je thok te timetouro nem tigom",
       "Khen Pikhristos Isos Penchois.",
+      "Hiten nipresvia:",
+      "nem Pekyot enaghathos:",
     ]) {
       expect(latin, expected).toContain(expected);
     }
