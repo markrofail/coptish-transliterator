@@ -44,14 +44,26 @@ function closest(runs: Run[], target: number): Run | undefined {
   return best;
 }
 
-function chooseCut(runs: Run[], target: number): Run | undefined {
-  for (const kind of KINDS) {
-    const ofKind = runs.filter((r) => r.kind === kind);
-    const near = ofKind.filter((r) => Math.abs(r.start - target) <= NEAR);
-    const best = closest(near, target) ?? closest(ofKind, target);
-    if (best) return best;
-  }
-  return undefined;
+// Picks the cut among whitespace runs near the target (within NEAR); only if no run at all sits
+// near the target does it look across the whole range. It takes the best kind of break whose cut
+// leaves the rest fitting in the remaining parts (so no extra part is forced), and the one closest
+// to the target within that kind. If no run lets the rest fit, it ignores that and takes the best kind.
+function chooseCut(runs: Run[], target: number, maxRest: number, total: number): Run | undefined {
+  const pick = (pool: Run[]): Run | undefined => {
+    const fitting = pool.filter((r) => total - r.end <= maxRest);
+    for (const candidates of [fitting, pool]) {
+      for (const kind of KINDS) {
+        const best = closest(
+          candidates.filter((r) => r.kind === kind),
+          target,
+        );
+        if (best) return best;
+      }
+    }
+    return undefined;
+  };
+  const near = runs.filter((r) => Math.abs(r.start - target) <= NEAR);
+  return near.length > 0 ? pick(near) : pick(runs);
 }
 
 // Splits validated, trimmed text into parts of at most MAX_INPUT_LENGTH code points, cutting at
@@ -66,7 +78,7 @@ export function splitParts(text: string): Part[] {
     const remaining = cps.length - start;
     const count = Math.ceil(remaining / MAX_INPUT_LENGTH);
     const target = start + Math.round(remaining / count);
-    const cut = chooseCut(runsIn(cps, start, MAX_INPUT_LENGTH), target);
+    const cut = chooseCut(runsIn(cps, start, MAX_INPUT_LENGTH), target, (count - 1) * MAX_INPUT_LENGTH, cps.length);
     if (!cut) {
       parts.push({ text: cps.slice(start, start + MAX_INPUT_LENGTH).join(""), separator });
       start += MAX_INPUT_LENGTH;

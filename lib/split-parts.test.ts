@@ -96,6 +96,55 @@ describe("splitParts", () => {
     for (const p of parts) expect(len(p.text)).toBeLessThanOrEqual(4000);
   });
 
+  it("splits the 16,000 maximum into 4 parts", () => {
+    const parts = splitParts(hymn(187));
+    expect(parts).toHaveLength(4);
+    for (const p of parts) expect(len(p.text)).toBeLessThanOrEqual(4000);
+  });
+
+  it("prefers a near line break over a far stanza break", () => {
+    const body = Array.from({ length: 300 }, (_, i) => stanza(i).replace(/\n/g, " ")).join("\n");
+    const text = "ⲡⲓϩⲩⲙⲛⲟⲥ\n\n" + body;
+    expect(len(text)).toBeGreaterThan(8000);
+    const parts = splitParts(text);
+    expect(len(parts[0].text)).toBeGreaterThanOrEqual(2000);
+    expect(parts.length).toBeLessThanOrEqual(Math.ceil(len(text) / 4000));
+    expect(joinParts(parts)).toBe(text);
+  });
+
+  it("does not cut off a short opening stanza as its own part", () => {
+    const lines = Array.from({ length: 66 }, (_, i) => stanza(i).replace(/\n/g, " "));
+    const text = lines.slice(0, 3).join("\n") + "\n\n" + lines.slice(3).join("\n");
+    expect(len(text)).toBeGreaterThan(5000);
+    expect(len(text)).toBeLessThanOrEqual(8000);
+    expect(splitParts(text)).toHaveLength(2);
+  });
+
+  it("cuts at a middle dot", () => {
+    const text = "ⲁⲃⲅ ⲇⲉ ⲉⲍ· ".repeat(400).trim();
+    expect(len(text)).toBeGreaterThan(4000);
+    const parts = splitParts(text);
+    expect(parts.length).toBeGreaterThan(1);
+    for (const [i, p] of parts.entries()) {
+      if (i > 0) expect(p.separator).toBe(" ");
+      if (i < parts.length - 1) expect(p.text.endsWith("·")).toBe(true);
+    }
+  });
+
+  it("takes the cut closest to the target", () => {
+    const text = hymn(150);
+    const parts = splitParts(text);
+    const total = len(text);
+    const n = parts.length;
+    let pos = 0;
+    for (let i = 0; i < n - 1; i++) {
+      pos += len(parts[i].text);
+      const target = Math.round((i + 1) * (total / n));
+      expect(Math.abs(pos - target)).toBeLessThanOrEqual(1000);
+      pos += parts[i + 1].separator.length;
+    }
+  });
+
   it("treats \\r\\n line endings like \\n", () => {
     const parts = splitParts(inputs.crlf);
     expect(parts.length).toBeGreaterThan(1);
