@@ -4,6 +4,10 @@ import { buildPrompt } from "@/lib/prompt";
 
 export const MODEL = "gemini-3.5-flash-lite";
 
+export type GeminiConfig = { model: string; thinkingLevel: ThinkingLevel };
+
+export const DEFAULT_CONFIG: GeminiConfig = { model: MODEL, thinkingLevel: ThinkingLevel.MINIMAL };
+
 const RESPONSE_SCHEMA = {
   type: "object",
   properties: { latin: { type: "string" } },
@@ -18,9 +22,12 @@ export function maxOutputTokens(text: string): number {
   return Math.min(2048, 64 + 2 * [...text].length);
 }
 
-export async function transliterate(text: string): Promise<TransliterationResult> {
+export async function transliterate(
+  text: string,
+  config: GeminiConfig = DEFAULT_CONFIG,
+): Promise<TransliterationResult> {
   const started = Date.now();
-  const result = await callGemini(text);
+  const result = await callGemini(text, config);
   // Logs never include the input or output text.
   console.info(
     JSON.stringify({
@@ -28,13 +35,13 @@ export async function transliterate(text: string): Promise<TransliterationResult
       code: result.ok ? "ok" : result.code,
       ms: Date.now() - started,
       inputLength: [...text].length,
-      model: MODEL,
+      model: config.model,
     }),
   );
   return result;
 }
 
-async function callGemini(text: string): Promise<TransliterationResult> {
+async function callGemini(text: string, config: GeminiConfig): Promise<TransliterationResult> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error("GEMINI_API_KEY is not set");
@@ -43,7 +50,7 @@ async function callGemini(text: string): Promise<TransliterationResult> {
   const { systemInstruction, contents } = buildPrompt(text);
   try {
     const response = await new GoogleGenAI({ apiKey }).models.generateContent({
-      model: MODEL,
+      model: config.model,
       contents,
       config: {
         systemInstruction,
@@ -51,7 +58,7 @@ async function callGemini(text: string): Promise<TransliterationResult> {
         maxOutputTokens: maxOutputTokens(text),
         responseMimeType: "application/json",
         responseJsonSchema: RESPONSE_SCHEMA,
-        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
+        thinkingConfig: { thinkingLevel: config.thinkingLevel },
       },
     });
     const latin = parseLatin(response.text);

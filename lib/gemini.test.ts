@@ -12,10 +12,11 @@ vi.mock("@google/genai", () => ({
       constructed.push(options);
     }
   },
-  ThinkingLevel: { MINIMAL: "MINIMAL" },
+  ThinkingLevel: { MINIMAL: "MINIMAL", LOW: "LOW" },
 }));
 
-import { MODEL, maxOutputTokens, transliterate } from "@/lib/gemini";
+import { ThinkingLevel } from "@google/genai";
+import { DEFAULT_CONFIG, MODEL, maxOutputTokens, transliterate } from "@/lib/gemini";
 import { SYSTEM_INSTRUCTION } from "@/lib/prompt";
 
 function apiError(status: number) {
@@ -64,6 +65,19 @@ describe("transliterate", () => {
       },
       thinkingConfig: { thinkingLevel: "MINIMAL" },
     });
+  });
+
+  it("defaults to the production model and minimal thinking", () => {
+    expect(DEFAULT_CONFIG).toEqual({ model: MODEL, thinkingLevel: "MINIMAL" });
+  });
+
+  it("uses a custom model and thinking level when given, and logs that model", async () => {
+    generateContent.mockResolvedValue({ text: '{"latin":"Amin"}' });
+    await transliterate("Ⲁⲙⲏⲛ", { model: "gemini-test-flash", thinkingLevel: ThinkingLevel.LOW });
+    const request = generateContent.mock.calls[0][0];
+    expect(request.model).toBe("gemini-test-flash");
+    expect(request.config.thinkingConfig).toEqual({ thinkingLevel: "LOW" });
+    expect(String(vi.mocked(console.info).mock.calls[0][0])).toContain('"model":"gemini-test-flash"');
   });
 
   it("maps a 429 from Gemini to rate_limited", async () => {
