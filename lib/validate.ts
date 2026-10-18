@@ -1,4 +1,4 @@
-export const MAX_INPUT_LENGTH = 1000;
+export const MAX_INPUT_LENGTH = 4000;
 
 // Letters only Coptic uses: the Coptic block, plus the Coptic letters in the Greek block (Ϣ…ϯ).
 const COPTIC_SPECIFIC = /[Ⲁ-⳿Ϣ-ϯ]/u;

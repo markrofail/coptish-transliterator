@@ -140,10 +140,10 @@ describe("transliterate", () => {
 });
 
 describe("maxOutputTokens", () => {
-  it("is 64 plus twice the input length, capped at 2,048", () => {
+  it("is 64 plus twice the input length, capped at 8,192", () => {
     expect(maxOutputTokens("ⲁ")).toBe(66);
-    expect(maxOutputTokens("ⲁ".repeat(991))).toBe(2046);
-    expect(maxOutputTokens("ⲁ".repeat(992))).toBe(2048);
-    expect(maxOutputTokens("ⲁ".repeat(1000))).toBe(2048);
+    expect(maxOutputTokens("ⲁ".repeat(4000))).toBe(8064);
+    expect(maxOutputTokens("ⲁ".repeat(4064))).toBe(8192);
+    expect(maxOutputTokens("ⲁ".repeat(5000))).toBe(8192);
   });
 });

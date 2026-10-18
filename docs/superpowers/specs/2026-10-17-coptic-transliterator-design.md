@@ -25,7 +25,7 @@ Inputs are short: a word, a response, or one hymn verse.
 | Pronunciation | Greco-Bohairic |
 | Spelling | English-friendly digraphs, no diacritics, no hyphens inside words |
 | Letter rules (iteration 2) | Follow the tasbeha.org Coptic lesson 0.5 (Greco-Bohairic): ⲏ → *ee*, ⲱ → *o*, ⲇ → *th*, ⲅ → *gh*, ⲃ → *v* (*b* at word end), ϭ → *ch*. Plus the user's rules from test.md: ⲭ → *k* in native words, ⲓ → *y* starting a syllable before a vowel, overlined sacred names spelled out, *Amen*/*Alleluia*/*Kirie eleison* as fixed spellings |
-| Input size | Up to 1,000 code points per request |
+| Input size | Up to 4,000 code points per request (raised from 1,000 by the 2026-10-18 page redesign) |
 | Engine | Google Gemini via `@google/genai`, constrained by the prompt and the output checks |
 | Reference data | Iteration 1: 10 pairs Claude writes from standard Greco-Bohairic rules. Iteration 2: grown to 30 from real misses. The user spot-checks every pair before use |
 | Stack | Next.js (App Router), React, Tailwind CSS, TypeScript, npm, Vitest |
@@ -81,7 +81,7 @@ Failure: `{ "error": { "code": string, "message": string, "retryAfter"?: number 
 | `rate_limited` | 429 | Gemini returned 429. When Gemini gives a retry delay, it is sent as the `Retry-After` header and `retryAfter` (seconds) |
 | `upstream` | 502 | Gemini 5xx, network failure, bad or missing API key, or any other unexpected SDK error |
 | `bad_output` | 502 | The Gemini reply fails JSON parsing or `validateOutput` |
-| `timeout` | 504 | No Gemini reply within 25 seconds (server-side abort) |
+| `timeout` | 504 | No Gemini reply within 55 seconds (server-side abort) |
 
 `message` is plain language a user can read. The client chooses how to display the error from `code`.
 
@@ -97,7 +97,7 @@ Definitions:
 `validateInput(text)` fails when:
 
 - the trimmed text is empty
-- its length is over 1,000
+- its length is over 4,000
 - it contains no Coptic-specific character (text typed only in Greek-block letters, or in legacy ASCII Coptic fonts, is rejected with a message asking for Unicode Coptic)
 
 `validateOutput(input, latin)` fails when:
@@ -134,9 +134,9 @@ The user text goes into the request between fixed delimiters (for example `<copt
 - The model ID is one exported constant. Iteration 1 uses `gemini-3.5-flash-lite`. Iteration 2 compared it with `gemini-3.8-flash` using the evaluation script (section 9). 3.8-flash fixed more misses but allows only 20 free requests a day per project, so `gemini-3.5-flash-lite` stays.
 - temperature 0
 - JSON output with the response schema `{ latin: string }`, required
-- `maxOutputTokens` = 64 + 2 × the input length, capped at 2,048
+- `maxOutputTokens` = 64 + 2 × the input length, capped at 8,192
 - thinking level low (iteration 1 used minimal; low scored higher in iteration 2)
-- an `AbortSignal` timeout of 25 seconds
+- an `AbortSignal` timeout of 55 seconds, so it fits inside the 60-second `maxDuration`
 - no automatic retry
 
 ### Error mapping
@@ -161,23 +161,13 @@ There is no in-memory rate limiter, because each serverless instance would keep 
 
 ## 8. UI (`app/transliterator.tsx`)
 
-- **Layout:** stacked on small screens, with input on top and output below. Side by side from Tailwind's `md` breakpoint, with input on the left.
-- **Font:** Noto Sans Coptic (loaded in `app/layout.tsx`, self-hosted at build time), used for the input.
-- **Input:** `<textarea lang="cop">` with a label, a placeholder example, and an `n / 1000` counter. `validateInput` runs on the client before any request, and its error appears next to the input.
-- **Submit:** a "Transliterate" button and Ctrl/Cmd+Enter. The button is disabled while the input is empty or over the limit. Submitting again aborts the request in progress.
-- **Loading:** the button shows a spinner and "Transliterating…", and the output area dims. The input stays editable.
-- **Output:** read-only, in a large reading size, marked `aria-live="polite"`, with a Copy button.
-- **Errors:** an inline `role="alert"` message under the button, with wording chosen from `code`. The client also handles non-JSON responses (for example Vercel's HTML 504 page), network failures, and its own 30-second abort, always with a plain-language message.
-- **State:** `inputText`, `outputText`, `isLoading`, and `error: { code, message } | null`.
-- **Theme:** follows the system light or dark setting via Tailwind `dark:`.
-
-Out of scope: an on-screen Coptic keyboard, history, saved texts, shareable links, accounts, and Old Bohairic or any dialect choice.
+Replaced by docs/superpowers/specs/2026-10-18-page-redesign-design.md.
 
 ## 9. Testing and evaluation
 
 ### Unit and component tests (Vitest; written test-first)
 
-- **`lib/validate.ts`:** each rule in section 5, including the Unicode boundaries, the 1,000 limit, line counts with `\r\n`, and both ratio limits.
+- **`lib/validate.ts`:** each rule in section 5, including the Unicode boundaries, the 4,000 limit, line counts with `\r\n`, and both ratio limits.
 - **`lib/prompt.ts`:** the rules section and delimiters are present, every example pair is included, and no held-out pair appears.
 - **`lib/gemini.ts`, with the SDK mocked:**
   - 429 → `rate_limited` (with and without a retry delay)
@@ -287,6 +277,6 @@ Each iteration ships to the same `.vercel.app` URL and is planned only after the
 | # | Adds | Trigger |
 |---|---|---|
 | 2 | `scripts/eval.ts`, a reference set grown from iteration 1's misses with the example/held-out split, prompt tuning against the launch bar (section 9), and the choice between the two models | Iteration 1 misses. **In progress** (2026-10-18): source is `test.md` (Sign of the Cross and Lord's Prayer), giving 14 example and 7 held-out pairs. First eval: `gemini-3.5-flash-lite` 57% exact / 97.9% chars at minimal and low thinking; `gemini-3.8-flash` (low) better on jinkim but adds hyphens and rate-limits. Kept flash-lite + minimal at first; then switched to `gemini-3.8-flash` at low thinking (its lowest level) at the user's request. Clean 3.8 run: 3/7 exact; about 98.7% chars on the 6 lines it returned (one 503 overloaded); the jinkim misses are fixed, but it still inserts hyphens (*ero-ou*). Caveat: several prompt rule examples use held-out words, so a clean held-out set needs new texts. Then added the Annual Conclusion hymn (tasbeha 2592) as 9 more held-out pairs (16 in all). `gemini-3.8-flash` turned out to allow only 20 free requests a day per project, so it was dropped for `gemini-3.5-flash-lite`. Added the jinkim pre-pass (`lib/jinkim.ts`). On the 16 held-out lines, before → after: minimal 63%/98.0% → 63%/97.7%, low 56%/97.8% → **63%/98.5%**. The pre-pass removed every jinkim miss, and low thinking became the default. Still missing: ⲱⲟⲩ → *oou* (*pipethou*), ⲃ → *v* (*nennobi*), ⲅ → *gh* (*enagathos*), ⲭ → *k* (*kha*), a jinkim on a final vowel (ⲁⲕⲓ̀ → *akiy*) |
-| 3 | `validateOutput`, the `bad_output`, `timeout` and `forbidden` codes, the 25-second abort, `Retry-After`, the same-origin check, client-side validation, and cancelling on resubmit | Garbage outputs or abuse |
-| 4 | Copy, the character counter, Ctrl/Cmd+Enter, side-by-side layout, dark mode, `aria-live`, and component tests | Usability feedback |
+| 3 | `validateOutput`, the `bad_output`, `timeout` and `forbidden` codes, the 55-second abort, `Retry-After`, and the same-origin check | Garbage outputs or abuse |
+| 4 | Delivered by the 2026-10-18 page redesign, which drops dark mode and the side-by-side layout. | Usability feedback |
 | 5 | The Vercel Firewall rate-limit rule (if Hobby offers it) and the README | Before sharing the link widely |

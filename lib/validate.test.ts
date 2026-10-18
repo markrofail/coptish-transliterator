@@ -16,11 +16,12 @@ describe("validateInput", () => {
     }
   });
 
-  it("accepts exactly 1,000 code points and rejects 1,001", () => {
+  it("accepts exactly 4,000 code points and rejects 4,001", () => {
+    expect(MAX_INPUT_LENGTH).toBe(4000);
     expect(validateInput(COPTIC_LETTER.repeat(MAX_INPUT_LENGTH)).ok).toBe(true);
     const tooLong = validateInput(COPTIC_LETTER.repeat(MAX_INPUT_LENGTH + 1));
     expect(tooLong.ok).toBe(false);
-    if (!tooLong.ok) expect(tooLong.message).toContain("1001");
+    if (!tooLong.ok) expect(tooLong.message).toContain("4001");
   });
 
   it("measures length after trimming", () => {
@@ -29,8 +30,8 @@ describe("validateInput", () => {
 
   it("counts combining marks such as the jinkim as characters", () => {
     const withJinkim = "ⲛ̀"; // ⲛ̀ is two code points
-    expect(validateInput(withJinkim.repeat(500)).ok).toBe(true);
-    expect(validateInput(withJinkim.repeat(500) + COPTIC_LETTER).ok).toBe(false);
+    expect(validateInput(withJinkim.repeat(MAX_INPUT_LENGTH / 2)).ok).toBe(true);
+    expect(validateInput(withJinkim.repeat(MAX_INPUT_LENGTH / 2) + COPTIC_LETTER).ok).toBe(false);
   });
 
   it("accepts the Coptic block boundaries and the Coptic letters in the Greek block", () => {

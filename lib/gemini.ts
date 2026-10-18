@@ -21,7 +21,7 @@ export type TransliterationResult =
   | { ok: false; code: "rate_limited" | "upstream" };
 
 export function maxOutputTokens(text: string): number {
-  return Math.min(2048, 64 + 2 * [...text].length);
+  return Math.min(8192, 64 + 2 * [...text].length);
 }
 
 export async function transliterate(
