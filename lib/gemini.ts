@@ -2,12 +2,12 @@ import "server-only";
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { buildPrompt } from "@/lib/prompt";
 
-export const MODEL = "gemini-3.8-flash";
+export const MODEL = "gemini-3.5-flash-lite";
 
 export type GeminiConfig = { model: string; thinkingLevel: ThinkingLevel };
 
-// LOW is the lowest thinking level gemini-3.8-flash supports (it has no MINIMAL).
-export const DEFAULT_CONFIG: GeminiConfig = { model: MODEL, thinkingLevel: ThinkingLevel.LOW };
+// gemini-3.8-flash scored better but its free tier allows only 20 requests a day per project.
+export const DEFAULT_CONFIG: GeminiConfig = { model: MODEL, thinkingLevel: ThinkingLevel.MINIMAL };
 
 const RESPONSE_SCHEMA = {
   type: "object",

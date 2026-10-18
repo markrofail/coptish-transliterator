@@ -48,7 +48,7 @@ describe("transliterate", () => {
     expect(constructed).toEqual([{ apiKey: "test-key" }]);
     const request = generateContent.mock.calls[0][0];
     expect(request.model).toBe(MODEL);
-    expect(MODEL).toBe("gemini-3.8-flash");
+    expect(MODEL).toBe("gemini-3.5-flash-lite");
     expect(request.contents.at(-1)).toEqual({
       role: "user",
       parts: [{ text: "<coptic>\nⲀⲙⲏⲛ\n</coptic>" }],
@@ -63,12 +63,12 @@ describe("transliterate", () => {
         properties: { latin: { type: "string" } },
         required: ["latin"],
       },
-      thinkingConfig: { thinkingLevel: "LOW" },
+      thinkingConfig: { thinkingLevel: "MINIMAL" },
     });
   });
 
-  it("defaults to the production model and low thinking, its lowest supported level", () => {
-    expect(DEFAULT_CONFIG).toEqual({ model: MODEL, thinkingLevel: "LOW" });
+  it("defaults to the production model and minimal thinking", () => {
+    expect(DEFAULT_CONFIG).toEqual({ model: MODEL, thinkingLevel: "MINIMAL" });
   });
 
   it("uses a custom model and thinking level when given, and logs that model", async () => {
