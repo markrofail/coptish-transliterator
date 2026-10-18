@@ -7,9 +7,9 @@ import { transliterate, type GeminiConfig } from "@/lib/gemini";
 import type { ReferencePair } from "@/lib/prompt";
 
 const SETUPS: { name: string; config: GeminiConfig }[] = [
-  { name: "gemini-3.8-flash low", config: { model: "gemini-3.8-flash", thinkingLevel: ThinkingLevel.LOW } },
-  { name: "gemini-3.5-flash-lite minimal", config: { model: "gemini-3.5-flash-lite", thinkingLevel: ThinkingLevel.MINIMAL } },
-  { name: "gemini-3.5-flash-lite low", config: { model: "gemini-3.5-flash-lite", thinkingLevel: ThinkingLevel.LOW } },
+  { name: "gemini-3.8-flash low", config: { model: "gemini-3.8-flash", thinkingLevel: ThinkingLevel.LOW, temperature: 0 } },
+  { name: "gemini-3.5-flash-lite minimal", config: { model: "gemini-3.5-flash-lite", thinkingLevel: ThinkingLevel.MINIMAL, temperature: 0 } },
+  { name: "gemini-3.5-flash-lite low", config: { model: "gemini-3.5-flash-lite", thinkingLevel: ThinkingLevel.LOW, temperature: 0 } },
 ];
 
 // Spaces calls out to stay under free-tier requests-per-minute limits (gemini-3.8-flash hit 429s at ~7/min).

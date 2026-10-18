@@ -1,4 +1,5 @@
-import { transliterate } from "@/lib/gemini";
+import { READINGS, transliterate } from "@/lib/gemini";
+import { READING_NUMBERS } from "@/lib/readings";
 import { validateInput } from "@/lib/validate";
 
 // The longest Vercel lets this function run, in seconds.
@@ -17,9 +18,16 @@ export async function POST(request: Request): Promise<Response> {
   } catch {
     return errorResponse(400, "invalid_input", "Send JSON with a text field.");
   }
-  const raw = typeof body === "object" && body !== null && "text" in body ? body.text : undefined;
+  const fields = typeof body === "object" && body !== null ? body : {};
+  const raw = "text" in fields ? fields.text : undefined;
   if (typeof raw !== "string") {
     return errorResponse(400, "invalid_input", "Send JSON with a text field.");
+  }
+
+  const requested = "reading" in fields ? fields.reading : 1;
+  const reading = READING_NUMBERS.find((n) => n === requested);
+  if (reading === undefined) {
+    return errorResponse(400, "invalid_input", "reading must be 1, 2 or 3.");
   }
 
   const input = validateInput(raw);
@@ -27,7 +35,7 @@ export async function POST(request: Request): Promise<Response> {
     return errorResponse(400, "invalid_input", input.message);
   }
 
-  const result = await transliterate(input.text);
+  const result = await transliterate(input.text, READINGS[reading], reading);
   if (result.ok) {
     return Response.json({ latin: result.latin });
   }

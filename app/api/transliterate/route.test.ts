@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { transliterate } = vi.hoisted(() => ({ transliterate: vi.fn() }));
-vi.mock("@/lib/gemini", () => ({ transliterate }));
+vi.mock("@/lib/gemini", () => ({
+  transliterate,
+  READINGS: { 1: "config-1", 2: "config-2", 3: "config-3" },
+}));
 
 import { maxDuration, POST } from "@/app/api/transliterate/route";
 
@@ -31,7 +34,24 @@ describe("POST /api/transliterate", () => {
       status: 200,
       json: { latin: "Amin" },
     });
-    expect(transliterate).toHaveBeenCalledWith("Ⲁⲙⲏⲛ");
+    expect(transliterate).toHaveBeenCalledWith("Ⲁⲙⲏⲛ", "config-1", 1);
+  });
+
+  it("uses the requested reading's settings", async () => {
+    transliterate.mockResolvedValue({ ok: true, latin: "Amin" });
+    await call(JSON.stringify({ text: "Ⲁⲙⲏⲛ", reading: 3 }));
+    expect(transliterate).toHaveBeenCalledWith("Ⲁⲙⲏⲛ", "config-3", 3);
+  });
+
+  it("rejects a reading other than 1, 2 or 3", async () => {
+    for (const reading of [0, 4, "2", 1.5, null]) {
+      const { status, json } = await call(JSON.stringify({ text: "Ⲁⲙⲏⲛ", reading }));
+      expect(status, String(reading)).toBe(400);
+      expect(json, String(reading)).toEqual({
+        error: { code: "invalid_input", message: "reading must be 1, 2 or 3." },
+      });
+    }
+    expect(transliterate).not.toHaveBeenCalled();
   });
 
   it("rejects a body that isn't JSON or has no string text field", async () => {

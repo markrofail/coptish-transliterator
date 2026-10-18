@@ -16,7 +16,7 @@ vi.mock("@google/genai", () => ({
 }));
 
 import { ThinkingLevel } from "@google/genai";
-import { DEFAULT_CONFIG, MODEL, maxOutputTokens, transliterate } from "@/lib/gemini";
+import { DEFAULT_CONFIG, MODEL, READINGS, SAMPLED_TEMPERATURE, maxOutputTokens, transliterate } from "@/lib/gemini";
 import { SYSTEM_INSTRUCTION } from "@/lib/prompt";
 
 function apiError(status: number) {
@@ -68,16 +68,45 @@ describe("transliterate", () => {
   });
 
   it("defaults to the production model and low thinking", () => {
-    expect(DEFAULT_CONFIG).toEqual({ model: MODEL, thinkingLevel: "LOW" });
+    expect(DEFAULT_CONFIG).toEqual({ model: MODEL, thinkingLevel: "LOW", temperature: 0 });
   });
 
   it("uses a custom model and thinking level when given, and logs that model", async () => {
     generateContent.mockResolvedValue({ text: '{"latin":"Amin"}' });
-    await transliterate("Ⲁⲙⲏⲛ", { model: "gemini-test-flash", thinkingLevel: ThinkingLevel.LOW });
+    await transliterate("Ⲁⲙⲏⲛ", {
+      model: "gemini-test-flash",
+      thinkingLevel: ThinkingLevel.LOW,
+      temperature: 0,
+    });
     const request = generateContent.mock.calls[0][0];
     expect(request.model).toBe("gemini-test-flash");
     expect(request.config.thinkingConfig).toEqual({ thinkingLevel: "LOW" });
     expect(String(vi.mocked(console.info).mock.calls[0][0])).toContain('"model":"gemini-test-flash"');
+  });
+
+  it("defines reading 1 as today's settings and readings 2 and 3 as sampled", () => {
+    expect(READINGS[1]).toEqual({ model: "gemini-3.5-flash-lite", thinkingLevel: "LOW", temperature: 0 });
+    expect(SAMPLED_TEMPERATURE).toBe(1);
+    for (const reading of [2, 3] as const) {
+      expect(READINGS[reading]).toEqual({ ...READINGS[1], temperature: SAMPLED_TEMPERATURE });
+    }
+    expect(DEFAULT_CONFIG).toBe(READINGS[1]);
+  });
+
+  it("sends the config's temperature to Gemini", async () => {
+    generateContent.mockResolvedValue({ text: '{"latin":"Amin"}' });
+    await transliterate("Ⲁⲙⲏⲛ", READINGS[2], 2);
+    expect(generateContent.mock.calls[0][0].config.temperature).toBe(SAMPLED_TEMPERATURE);
+  });
+
+  it("logs the reading and temperature", async () => {
+    generateContent.mockResolvedValue({ text: '{"latin":"Amin"}' });
+    await transliterate("Ⲁⲙⲏⲛ", READINGS[3], 3);
+    await transliterate("Ⲁⲙⲏⲛ");
+    const [withReading, withoutReading] = vi.mocked(console.info).mock.calls.map((args) => String(args[0]));
+    expect(withReading).toContain('"reading":3');
+    expect(withReading).toContain(`"temperature":${SAMPLED_TEMPERATURE}`);
+    expect(withoutReading).toContain('"reading":null');
   });
 
   it("maps a 429 from Gemini to rate_limited", async () => {

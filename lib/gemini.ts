@@ -1,14 +1,24 @@
 import "server-only";
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { buildPrompt } from "@/lib/prompt";
+import type { Reading } from "@/lib/readings";
 
 export const MODEL = "gemini-3.5-flash-lite";
 
-export type GeminiConfig = { model: string; thinkingLevel: ThinkingLevel };
+export type GeminiConfig = { model: string; thinkingLevel: ThinkingLevel; temperature: number };
 
 // gemini-3.8-flash scored better but its free tier allows only 20 requests a day per project.
 // Low thinking beat minimal on the held-out pairs (63% exact / 98.5% chars against 63% / 97.7%).
-export const DEFAULT_CONFIG: GeminiConfig = { model: MODEL, thinkingLevel: ThinkingLevel.LOW };
+// Readings 2 and 3 are sampled so the reader has something to choose between.
+export const SAMPLED_TEMPERATURE = 1;
+
+export const READINGS: Record<Reading, GeminiConfig> = {
+  1: { model: MODEL, thinkingLevel: ThinkingLevel.LOW, temperature: 0 },
+  2: { model: MODEL, thinkingLevel: ThinkingLevel.LOW, temperature: SAMPLED_TEMPERATURE },
+  3: { model: MODEL, thinkingLevel: ThinkingLevel.LOW, temperature: SAMPLED_TEMPERATURE },
+};
+
+export const DEFAULT_CONFIG = READINGS[1];
 
 const RESPONSE_SCHEMA = {
   type: "object",
@@ -27,6 +37,7 @@ export function maxOutputTokens(text: string): number {
 export async function transliterate(
   text: string,
   config: GeminiConfig = DEFAULT_CONFIG,
+  reading?: Reading,
 ): Promise<TransliterationResult> {
   const started = Date.now();
   const result = await callGemini(text, config);
@@ -38,6 +49,8 @@ export async function transliterate(
       ms: Date.now() - started,
       inputLength: [...text].length,
       model: config.model,
+      temperature: config.temperature,
+      reading: reading ?? null,
     }),
   );
   return result;
@@ -56,7 +69,7 @@ async function callGemini(text: string, config: GeminiConfig): Promise<Translite
       contents,
       config: {
         systemInstruction,
-        temperature: 0,
+        temperature: config.temperature,
         maxOutputTokens: maxOutputTokens(text),
         responseMimeType: "application/json",
         responseJsonSchema: RESPONSE_SCHEMA,

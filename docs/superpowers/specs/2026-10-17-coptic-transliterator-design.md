@@ -68,7 +68,7 @@ Nothing is stored. Each request stands alone.
 
 `POST /api/transliterate`
 
-Request body: `{ "text": string }`
+Request body: `{ "text": string, "reading"?: 1 | 2 | 3 }`
 
 Success: `200 { "latin": string }`
 
@@ -76,7 +76,7 @@ Failure: `{ "error": { "code": string, "message": string, "retryAfter"?: number 
 
 | `code` | Status | When |
 |---|---|---|
-| `invalid_input` | 400 | The body isn't valid JSON, `text` is missing or not a string, or `validateInput` fails |
+| `invalid_input` | 400 | The body isn't valid JSON, `text` is missing or not a string, `reading` is present but not 1, 2 or 3, or `validateInput` fails |
 | `forbidden` | 403 | The same-origin check fails (section 7) |
 | `rate_limited` | 429 | Gemini returned 429. When Gemini gives a retry delay, it is sent as the `Retry-After` header and `retryAfter` (seconds) |
 | `upstream` | 502 | Gemini 5xx, network failure, bad or missing API key, or any other unexpected SDK error |
@@ -132,7 +132,7 @@ The user text goes into the request between fixed delimiters (for example `<copt
 ### Model call (`lib/gemini.ts`)
 
 - The model ID is one exported constant. Iteration 1 uses `gemini-3.5-flash-lite`. Iteration 2 compared it with `gemini-3.8-flash` using the evaluation script (section 9). 3.8-flash fixed more misses but allows only 20 free requests a day per project, so `gemini-3.5-flash-lite` stays.
-- temperature 0
+- temperature 0 for reading 1; readings 2 and 3 at `SAMPLED_TEMPERATURE` (see `2026-10-18-three-readings-design.md`)
 - JSON output with the response schema `{ latin: string }`, required
 - `maxOutputTokens` = 64 + 2 × the input length, capped at 8,192
 - thinking level low (iteration 1 used minimal; low scored higher in iteration 2)
