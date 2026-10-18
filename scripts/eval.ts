@@ -35,17 +35,32 @@ async function runThree(heldout: ReferencePair[], temperature: number) {
   let useful = 0;
   let noise = 0;
   let reachable = 0;
+  let errors = 0; // failed readings across the run
+  let skipped = 0; // pairs where all three readings failed
 
   for (const pair of heldout) {
     const texts: Partial<Record<Reading, string>> = {};
+    const codes: string[] = [];
     for (const reading of READING_NUMBERS) {
       const result = await transliterate(pair.coptic, configs[reading], reading);
       if (result.ok) texts[reading] = result.latin;
-      else console.log(`    reading ${reading} failed: ${result.code}`);
+      else {
+        errors++;
+        codes.push(`${reading}: ${result.code}`);
+        console.log(`    reading ${reading} failed: ${result.code}`);
+      }
       await sleep(DELAY_MS);
+    }
+    if (codes.length === READING_NUMBERS.length) {
+      // mergeReadings needs at least one reading, so a pair with none can't be scored.
+      skipped++;
+      console.log(`\nskipped (all readings failed): ${codes.join(", ")}`);
+      continue;
     }
     const inputLineCount = pair.coptic.split(/\r?\n/).length;
     const merged = mergeReadings(texts, inputLineCount);
+    const leftOut = READING_NUMBERS.filter((reading) => texts[reading] !== undefined && !merged.readings.includes(reading));
+    if (leftOut.length > 0) console.log(`    left out of the merge: reading ${leftOut.join(", ")}`);
     const defaultText = mergedText(merged, {});
     const score = scoreReadings(merged, pair.latin);
 
@@ -63,6 +78,12 @@ async function runThree(heldout: ReferencePair[], temperature: number) {
     }
   }
 
+  const scored = heldout.length - skipped;
+  if (skipped > 0) console.log(`\nSkipped ${skipped} of ${heldout.length} pairs: all three readings failed.`);
+  if (scored === 0) {
+    console.log("No pair had a reading come back, so there is nothing to score.");
+    return;
+  }
   const reading1 = summarize(reading1Scores);
   const mergedSummary = summarize(mergedScores);
   console.log();
@@ -76,7 +97,8 @@ async function runThree(heldout: ReferencePair[], temperature: number) {
       "spans/line": (spans / lines).toFixed(2),
       useful,
       noise,
-      reachable: `${Math.round((reachable / heldout.length) * 100)}%`,
+      reachable: `${Math.round((reachable / scored) * 100)}%`,
+      errors,
     },
   ]);
 }
