@@ -23,7 +23,8 @@ Inputs are short: a word, a response, or one hymn verse.
 |---|---|
 | Purpose | Public reading and pronunciation aid |
 | Pronunciation | Greco-Bohairic |
-| Spelling | English-friendly digraphs, no diacritics |
+| Spelling | English-friendly digraphs, no diacritics, no hyphens inside words |
+| Letter rules (iteration 2) | Follow the tasbeha.org Coptic lesson 0.5 (Greco-Bohairic): ⲏ → *ee*, ⲱ → *o*, ⲇ → *th*, ⲅ → *gh*, ⲃ → *v* (*b* at word end), ϭ → *ch*. Plus the user's rules from test.md: ⲭ → *k* in native words, ⲓ → *y* starting a syllable before a vowel, overlined sacred names spelled out, *Amen*/*Alleluia*/*Kirie eleison* as fixed spellings |
 | Input size | Up to 1,000 code points per request |
 | Engine | Google Gemini via `@google/genai`, constrained by the prompt and the output checks |
 | Reference data | Iteration 1: 10 pairs Claude writes from standard Greco-Bohairic rules. Iteration 2: grown to 30 from real misses. The user spot-checks every pair before use |
@@ -118,6 +119,7 @@ Definitions:
    - a jinkim on a consonant → a preceding *e*
    - ⲅ before ⲅ, ⲕ, ⲝ or ⲭ → *n*
    - the Greek-loanword readings of ⲭ, ⲇ and ⲅ
+   - from iteration 2: ⲏ → *ee* (ⲏⲓ → *ee*); ⲱ → *o*; ⲇ → *th*; ⲅ → *gh*; ⲃ → *v*, but *b* at the end of a word; ⲭ → *k* in native words, *kh* in Greek words, *sh* before front vowels in Greek words; ⲓ → *y* starting a syllable before a vowel; overlined abbreviations spelled out (Ⲡⲭ̅ⲥ̅ → *Pikhristos*, Ⲓⲏ̅ⲥ̅ → *Isos*, ⲟ̅ⲥ̅ → *chois*); no hyphens inside words; a "Check before replying" list of the rules the model broke in test.md
 4. **Formatting.** Keep line breaks, punctuation and word boundaries. Copy non-Coptic text (digits, Latin letters) unchanged.
 5. **Output format.** Return only JSON matching the schema.
 
@@ -282,7 +284,7 @@ Each iteration ships to the same `.vercel.app` URL and is planned only after the
 
 | # | Adds | Trigger |
 |---|---|---|
-| 2 | `scripts/eval.ts`, a reference set grown from iteration 1's misses with the example/held-out split, prompt tuning against the launch bar (section 9), and the choice between the two models | Iteration 1 misses |
+| 2 | `scripts/eval.ts`, a reference set grown from iteration 1's misses with the example/held-out split, prompt tuning against the launch bar (section 9), and the choice between the two models | Iteration 1 misses. **In progress** (2026-10-18): source is `test.md` (Sign of the Cross and Lord's Prayer), giving 14 example and 7 held-out pairs. First eval: `gemini-3.5-flash-lite` 57% exact / 97.9% chars at minimal and low thinking; `gemini-3.8-flash` (low) better on jinkim but adds hyphens and rate-limits. Kept flash-lite + minimal. Caveat: several prompt rule examples use held-out words, so a clean held-out set needs new texts |
 | 3 | `validateOutput`, the `bad_output`, `timeout` and `forbidden` codes, the 25-second abort, `Retry-After`, the same-origin check, client-side validation, and cancelling on resubmit | Garbage outputs or abuse |
 | 4 | Copy, the character counter, Ctrl/Cmd+Enter, side-by-side layout, dark mode, `aria-live`, and component tests | Usability feedback |
 | 5 | The Vercel Firewall rate-limit rule (if Hobby offers it) and the README | Before sharing the link widely |
