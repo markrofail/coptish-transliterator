@@ -6,16 +6,10 @@ import { Composer } from "@/app/composer";
 import { ExampleList } from "@/app/example-list";
 import type { Example } from "@/app/examples";
 import { OutputPanel } from "@/app/output-panel";
-import { requestTransliteration } from "@/app/request-transliteration";
-import {
-  settleReadings,
-  stragglerDelay,
-  type Results,
-  type Statuses,
-} from "@/app/settle-readings";
+import { runReadings } from "@/app/run-readings";
+import type { Statuses } from "@/app/settle-readings";
 import { skeletonRows } from "@/app/view-helpers";
-import type { Merged } from "@/lib/merge-readings";
-import { READING_NUMBERS } from "@/lib/readings";
+import type { Choices, Merged, Span } from "@/lib/merge-readings";
 import { validateInput } from "@/lib/validate";
 
 type Phase =
@@ -23,15 +17,6 @@ type Phase =
   | { kind: "loading"; sentText: string; rows: number[]; statuses: Statuses }
   | { kind: "done"; merged: Merged; statuses: Statuses }
   | { kind: "error"; message: string; retryable: boolean };
-
-// One press of Transliterate: three readings sharing one controller.
-type Run = {
-  controller: AbortController;
-  results: Results;
-  firstBackAt: number | null;
-  timer: ReturnType<typeof setTimeout> | null;
-  settled: boolean;
-};
 
 const DESKTOP = "(min-width: 768px)";
 
@@ -41,10 +26,11 @@ export function Transliterator() {
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   // Keys the output panel, so each run starts with fresh panel state.
   const [runId, setRunId] = useState(0);
+  const [choices, setChoices] = useState<Choices>({});
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLElement>(null);
-  const runRef = useRef<Run | null>(null);
+  const stopRef = useRef<(() => void) | null>(null);
   const lastSentRef = useRef("");
 
   const busy = phase.kind === "loading" && text === phase.sentText;
@@ -74,11 +60,8 @@ export function Transliterator() {
 
   // Cancels the run in progress, so none of its replies or its timer can touch the page.
   function stopRun() {
-    const current = runRef.current;
-    if (!current) return;
-    current.controller.abort();
-    if (current.timer !== null) clearTimeout(current.timer);
-    runRef.current = null;
+    stopRef.current?.();
+    stopRef.current = null;
   }
 
   function run(raw: string) {
@@ -88,58 +71,33 @@ export function Transliterator() {
       setPhase({ kind: "error", message: input.message, retryable: false });
       return;
     }
-    const current: Run = {
-      controller: new AbortController(),
-      results: {},
-      firstBackAt: null,
-      timer: null,
-      settled: false,
-    };
-    runRef.current = current;
     lastSentRef.current = raw;
-    const lineCount = input.text.split(/\r?\n/).length;
     const rows = skeletonRows(input.text, charsPerRow());
     setRunId((id) => id + 1);
+    setChoices({});
     setPhase({
       kind: "loading",
       sentText: raw,
       rows,
       statuses: { 1: "waiting", 2: "waiting", 3: "waiting" },
     });
-
-    function update(stopWaiting: boolean) {
-      if (runRef.current !== current || current.settled) return;
-      const settled = settleReadings(current.results, lineCount, stopWaiting);
+    stopRef.current = runReadings(input.text, (settled) => {
       if (settled.kind === "waiting") {
         setPhase({ kind: "loading", sentText: raw, rows, statuses: settled.statuses });
-        const delay = stragglerDelay(current.results, current.firstBackAt, Date.now());
-        if (delay !== null && current.timer === null) {
-          current.timer = setTimeout(() => update(true), delay);
-        }
-        return;
+      } else if (settled.kind === "done") {
+        setPhase({ kind: "done", merged: settled.merged, statuses: settled.statuses });
+      } else {
+        setPhase(settled);
       }
-      current.settled = true;
-      if (current.timer !== null) clearTimeout(current.timer);
-      current.timer = null;
-      setPhase(
-        settled.kind === "done"
-          ? { kind: "done", merged: settled.merged, statuses: settled.statuses }
-          : settled,
-      );
-    }
+    });
+  }
 
-    for (const reading of READING_NUMBERS) {
-      const reply = requestTransliteration(input.text, reading, fetch, current.controller.signal);
-      reply.then((result) => {
-        // A reply from an older run, or one after the cut-off, is dropped.
-        if (runRef.current !== current || current.settled) return;
-        if (!result.ok && result.aborted) return;
-        current.results[reading] = result;
-        // The straggler countdown starts from the first successful reading.
-        if (result.ok) current.firstBackAt ??= Date.now();
-        update(false);
-      });
-    }
+  // Every pick goes through here, with the number of the part it was made in: 1 for a short
+  // paste. Saving choices for the nightly analysis would be added here later (three-readings
+  // spec, section 8), and the part number lets a stored choice be traced to its place in the
+  // hymn; today it only updates the text.
+  function recordChoice(part: number, line: number, span: Span, chosenIndex: number) {
+    setChoices((current) => ({ ...current, [span.id]: chosenIndex }));
   }
 
   function handleTextChange(value: string) {
@@ -197,7 +155,13 @@ export function Transliterator() {
           </div>
         )}
         {(phase.kind === "loading" || phase.kind === "done") && (
-          <OutputPanel key={runId} phase={phase} ref={outputRef} />
+          <OutputPanel
+            key={runId}
+            phase={phase}
+            choices={choices}
+            onPick={(line, span, chosenIndex) => recordChoice(1, line, span, chosenIndex)}
+            ref={outputRef}
+          />
         )}
       </div>
       <aside className="md:sticky md:top-8">

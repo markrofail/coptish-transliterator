@@ -14,17 +14,20 @@ const COPIED_MS = 1600;
 
 export function OutputPanel({
   phase,
+  choices,
+  onPick,
   ref,
 }: {
   phase:
     | { kind: "loading"; rows: number[]; statuses: Statuses }
     | { kind: "done"; merged: Merged; statuses: Statuses };
+  choices: Choices;
+  onPick: (line: number, span: Span, chosenIndex: number) => void;
   ref?: Ref<HTMLElement>;
 }) {
   const loading = phase.kind === "loading";
   const [slow, setSlow] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [choices, setChoices] = useState<Choices>({});
   const textRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,12 +41,6 @@ export function OutputPanel({
     const timer = setTimeout(() => setCopied(false), COPIED_MS);
     return () => clearTimeout(timer);
   }, [copied]);
-
-  // Every pick goes through here. Saving choices for the nightly analysis would be added here
-  // later (spec section 8); today it only updates the text.
-  function recordChoice(line: number, span: Span, chosenIndex: number) {
-    setChoices((current) => ({ ...current, [span.id]: chosenIndex }));
-  }
 
   async function copy(latin: string) {
     try {
@@ -119,7 +116,7 @@ export function OutputPanel({
       ) : (
         <>
           <div ref={textRef}>
-            <MergedText merged={phase.merged} choices={choices} onPick={recordChoice} />
+            <MergedText merged={phase.merged} choices={choices} onPick={onPick} />
           </div>
           <p
             className="mt-4 animate-line-rise text-[15px] leading-[1.4] text-ink/60"
