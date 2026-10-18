@@ -1,7 +1,7 @@
 # Page Redesign — Design
 
 Date: 2026-10-18
-Status: Approved by the user on 2026-10-18
+Status: Implemented (approved by the user on 2026-10-18)
 
 This document replaces section 8 (UI) of `2026-10-17-coptic-transliterator-design.md`. It also replaces that spec's "Input size" decision and the UI items in its iteration 4 row (Copy, counter, Ctrl/Cmd+Enter, side-by-side layout, dark mode). The API contract, prompt, model, and abuse protection are unchanged except where section 6 says otherwise.
 
@@ -172,6 +172,7 @@ The user wants a paste of up to 500 words to work. Today the server rejects anyt
 - **New limit: 4,000 code points (my call).** That is about 500 Coptic words with their combining marks. Change `MAX_INPUT_LENGTH` in `lib/validate.ts` and its tests. The message format stays the same.
 - **Output budget.** `maxOutputTokens` in `lib/gemini.ts` is currently `64 + 2 × length`, capped at 2,048. A 4,000-character input would be truncated. Raise or remove the cap so the longest allowed input gets a complete answer, and check whether thinking tokens count against this budget for `gemini-3.5-flash-lite`. Update the `maxOutputTokens` tests.
 - **Time.** The route's `maxDuration` is 60 seconds. Before calling this done, run one real request with roughly 4,000 code points of Coptic through the full API, then record its latency and whether the output was complete. If it doesn't fit in 60 seconds, come back to the user. Don't quietly lower the limit.
+  - **Measured 2026-10-18:** 3,923 code points (148 lines, 609 words of reference lines in shuffled order) gave a 200 in 4.2 s through `/api/transliterate`, with 148/148 lines and 609/609 words. Gemini reported `finishReason: STOP` and 1,683 output tokens against a budget of 7,910, so the budget needs no change. The same lines repeated as one 31-line block about five times in a row came back short: 86 of 148 lines, `STOP` after 971 tokens. So `gemini-3.5-flash-lite` can end early when a long block repeats verbatim. That is a model behavior, not a budget or time limit.
 - **Old spec.** Update `2026-10-17-coptic-transliterator-design.md`:
   - the Input size row
   - section 5's "over 1,000"
