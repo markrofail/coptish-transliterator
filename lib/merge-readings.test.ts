@@ -252,6 +252,36 @@ describe("mergeReadings", () => {
       ],
     ]);
   });
+
+  it("aligns repeated words when the base differs first", () => {
+    const merged = mergeReadings({ 1: "Amin Amen Amen", 2: "Amen Amen Amen", 3: "Amen Amen Amen" }, 1);
+    expect(merged.lines).toEqual([
+      [
+        {
+          kind: "span",
+          id: "0:0",
+          alternatives: [
+            { text: "Amen", readings: [2, 3] },
+            { text: "Amin", readings: [1] },
+          ],
+        },
+        w("Amen"),
+        w("Amen"),
+      ],
+    ]);
+  });
+
+  it("leaves out a reading with letters outside plain Latin", () => {
+    const merged = mergeReadings({ 1: "ente rashti meef", 2: "ente rashti meef", 3: "ente rasţi meef" }, 1);
+    expect(merged.lines).toEqual([[w("ente"), w("rashti"), w("meef")]]);
+    expect(merged.readings).toEqual([1, 2]);
+  });
+
+  it("falls back to the lowest reading, unmarked, when every reading is off-convention", () => {
+    const merged = mergeReadings({ 1: "Kýrie", 2: "Kyríe" }, 1);
+    expect(merged.lines).toEqual([[w("Kýrie")]]);
+    expect(merged.readings).toEqual([1]);
+  });
 });
 
 describe("lineText and mergedText", () => {

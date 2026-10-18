@@ -87,6 +87,7 @@ Every transliteration uses three free-tier requests instead of one, so the site 
 Inputs: the readings that came back, keyed by reading number, plus the line count of the validated input text.
 
 - **Lines.** Split each reading on line breaks. A reading whose line count differs from the input's is left out of the merge (my call). Treat it like a failed request in the UI. If that leaves no reading, show the lowest-numbered reading that came back as plain text, with no marks.
+  A reading with letters outside plain Latin, or with combining marks, is left out the same way.
 - **Words.** Within each line, split on whitespace and align the readings word by word with a standard sequence diff. A maximal run where they don't all agree becomes one **span**. A span can cover several words, for example *enneet e* against *enneeete*.
 - **Neighbouring disagreements (my call).** When every reading has the same number of words in such a run, split it into one span per word position instead, and leave any position they agree on as a plain word. This matches the mockup, where *evolha* and *pipethoou:* are marked and chosen separately.
 - **What counts as a disagreement (my call).** Compare words ignoring letter case and punctuation, so *Ethouab* against *ethouab*, or *pipethoou:* against *pipethoou*, is not marked. Where words agree, show the default reading's form.
@@ -198,6 +199,7 @@ One run costs 48 requests (16 held-out pairs × 3). Keep the existing delay betw
 - Neighbouring disagreements of equal length are split into one span per word.
 - The chooser is a listbox, not a radio group.
 - A reading with the wrong number of lines is left out.
+- A reading with letters outside plain Latin is left out of the merge.
 - A missing `reading` means 1, and an invalid one is a 400.
 - The notes' wording, and the "(leave out)" row.
 - On a wrapped line, the chooser opens below the whole line.

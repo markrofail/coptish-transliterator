@@ -9,6 +9,9 @@ export type Token = { kind: "word"; text: string } | Span;
 export type Merged = { lines: Token[][]; readings: Reading[] }; // readings: those merged, ascending
 export type Choices = Readonly<Record<string, number>>; // span id → alternative index; missing = 0
 
+// Plain Latin letters only: any other letter (ţ, ş, a Coptic letter left as is) or a combining mark leaves a reading out.
+const OFF_CONVENTION = /\p{M}|(?![A-Za-z])\p{L}/u;
+
 type Run = { reading: Reading; words: string[] };
 
 // Words are compared ignoring letter case and punctuation.
@@ -129,9 +132,11 @@ export function mergeReadings(texts: Partial<Record<Reading, string>>, inputLine
     const text = texts[reading];
     return text === undefined ? [] : [{ reading, lines: text.split(/\r?\n/) }];
   });
-  const kept = split.filter(({ lines }) => lines.length === inputLineCount);
+  const kept = split.filter(
+    ({ lines }) => lines.length === inputLineCount && !lines.some((line) => OFF_CONVENTION.test(line)),
+  );
   if (kept.length === 0) {
-    // No reading lines up with the input, so show the lowest one as it came, with no marks.
+    // No reading lines up with the input or keeps to plain Latin, so show the lowest one as it came, with no marks.
     const [fallback] = split;
     return { lines: fallback.lines.map((line) => plain(splitWords(line))), readings: [fallback.reading] };
   }
