@@ -1,7 +1,7 @@
 # Long Hymns, Bite by Bite — Design
 
 Date: 2026-10-18
-Status: Approved by the user on 2026-10-18
+Status: Implemented (approved by the user on 2026-10-18)
 
 This document builds on `2026-10-18-three-readings-design.md` and `2026-10-18-page-redesign-design.md`. It changes the page's input limit and adds a walk-through for long pastes. The server, the API contract, the prompt, the model and the three readings are unchanged.
 
@@ -158,6 +158,7 @@ At 4,000 characters or fewer, everything is exactly as today: no parts, no new l
   - keyboard use
   - reduced motion
 - **One real run** with the user's example hymn (tasbeha.org 1286, about 9,000 characters): all three parts through the live pipeline, 9 requests in total. Record the parts' sizes, each part's time, and each reading's line count against its part's.
+  - Measured 2026-10-18: the hymn is 9,000 characters, 81 stanzas and 324 lines, in 3 parts of 3,012, 2,999 and 2,985 characters (134 lines each, blank separators included). Parts took about 7.6 s, 5.6 s and 6.0 s from press to text, with single readings taking 3.6 to 4.2 s. Every reading I recorded came back with its part's 134 lines (parts 2 and 3 in full; part 1's third reading), no part was incomplete, and Copy all gave 81 stanzas.
   - **Stop rule (my call):** if any part comes back incomplete, stop and bring the numbers to the user, rather than tuning part sizes without them.
 - **`npm test` and `npm run build`** both pass.
 
