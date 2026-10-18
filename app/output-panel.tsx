@@ -6,7 +6,7 @@ import { MergedText } from "@/app/merged-text";
 import { ReadingDots } from "@/app/reading-dots";
 import type { Statuses } from "@/app/settle-readings";
 import { lineDelayMs, readingsNote } from "@/app/view-helpers";
-import { mergedText, type Choices, type Merged, type Span } from "@/lib/merge-readings";
+import { mergedText, spanCount, type Choices, type Merged, type Span } from "@/lib/merge-readings";
 import { READING_NUMBERS } from "@/lib/readings";
 
 const LONG_WAIT_MS = 8000;
@@ -124,7 +124,7 @@ export function OutputPanel({
           >
             {readingsNote(
               phase.merged.readings.length,
-              phase.merged.lines.flat().filter((token) => token.kind === "span").length,
+              spanCount(phase.merged),
               Object.keys(choices).length,
             )}
           </p>

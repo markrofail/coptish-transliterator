@@ -1,4 +1,6 @@
-import { MAX_INPUT_LENGTH } from "@/lib/validate";
+import { MAX_INPUT_LENGTH, MAX_PASTE_LENGTH } from "@/lib/validate";
+import { isIncomplete, spanCount, type Merged } from "@/lib/merge-readings";
+import { splitParts } from "@/lib/split-parts";
 import type { Statuses } from "@/app/settle-readings";
 import { READING_NUMBERS } from "@/lib/readings";
 
@@ -30,15 +32,43 @@ export function skeletonRows(text: string, charsPerRow: number): number[] {
   return rows.slice(0, SKELETON_MAX_ROWS);
 }
 
-export type CounterState = { visible: boolean; over: boolean; label: string };
+export type CounterState = { visible: boolean; over: boolean; label: string; parts: number };
 
 export function counterState(text: string): CounterState {
-  const length = [...text.trim()].length;
+  const trimmed = text.trim();
+  const length = [...trimmed].length;
+  const over = length > MAX_PASTE_LENGTH;
+  const parts = over ? 1 : splitParts(trimmed).length;
+  const count = `${length.toLocaleString("en-US")} / ${MAX_PASTE_LENGTH.toLocaleString("en-US")}`;
   return {
-    visible: length >= MAX_INPUT_LENGTH * 0.8,
-    over: length > MAX_INPUT_LENGTH,
-    label: `${length.toLocaleString("en-US")} / ${MAX_INPUT_LENGTH.toLocaleString("en-US")}`,
+    visible: length > MAX_INPUT_LENGTH,
+    over,
+    label: parts > 1 ? `${count} · ${parts} parts` : count,
+    parts,
   };
+}
+
+function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
+
+/** The text of a folded part's row, without the "Part N · " prefix. */
+export function foldedLabel(partText: string, merged: Merged, chosen: number): string {
+  const trimmed = partText.trim();
+  const stanzas = trimmed.split(/\n\s*\n/).length;
+  const lineCount = trimmed.split(/\r?\n/).length;
+  let size: string;
+  if (stanzas > 1) size = plural(stanzas, "stanza");
+  else if (lineCount > 1) size = plural(lineCount, "line");
+  else size = plural(trimmed.split(/\s+/).filter(Boolean).length, "word");
+
+  const spans = spanCount(merged);
+  let summary: string;
+  if (isIncomplete(merged, lineCount)) summary = "lines may be missing";
+  else if (spans > 0) summary = `${chosen} of ${spans} chosen`;
+  else if (merged.readings.length === 3) summary = "all agree";
+  else summary = `${merged.readings.length} of 3 readings came back`;
+  return `${size} · ${summary}`;
 }
 
 export function lineDelayMs(index: number): number {

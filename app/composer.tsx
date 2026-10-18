@@ -100,7 +100,7 @@ export function Composer({
                 </span>
               </span>
             ) : (
-              "Transliterate"
+              counter.parts > 1 ? "Transliterate part 1" : "Transliterate"
             )}
             <ArrowRightIcon size={16} weight="bold" aria-hidden="true" />
           </button>

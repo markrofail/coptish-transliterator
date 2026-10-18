@@ -1,7 +1,9 @@
+import { mergeReadings, spanCount } from "@/lib/merge-readings";
 import { describe, expect, it } from "vitest";
 import {
   SKELETON_MAX_ROWS,
   counterState,
+  foldedLabel,
   lineDelayMs,
   readingsBackLabel,
   readingsNote,
@@ -39,20 +41,62 @@ describe("skeletonRows", () => {
 });
 
 describe("counterState", () => {
-  it("stays hidden below 80% of the limit", () => {
-    expect(counterState(a(3199)).visible).toBe(false);
+  it("stays hidden up to 4,000", () => {
+    expect(counterState(a(4000))).toEqual({ visible: false, over: false, label: "4,000 / 16,000", parts: 1 });
   });
 
-  it("shows a formatted count from 3,200", () => {
-    expect(counterState(a(3200))).toEqual({ visible: true, over: false, label: "3,200 / 4,000" });
+  it("shows the count and parts above 4,000", () => {
+    const state = counterState(a(9000));
+    expect(state.visible).toBe(true);
+    expect(state.over).toBe(false);
+    expect(state.label).toBe("9,000 / 16,000 · 3 parts");
+    expect(state.parts).toBe(3);
   });
 
-  it("marks text over the limit", () => {
-    expect(counterState(a(4001))).toEqual({ visible: true, over: true, label: "4,001 / 4,000" });
+  it("marks text over 16,000, with no parts suffix", () => {
+    const state = counterState(a(16001));
+    expect(state.visible).toBe(true);
+    expect(state.over).toBe(true);
+    expect(state.label).toBe("16,001 / 16,000");
   });
 
   it("counts code points after trimming, combining marks included", () => {
-    expect(counterState(`  ${"ⲛ̀".repeat(1600)}\n`).label).toBe("3,200 / 4,000");
+    expect(counterState(`  ${"ⲛ̀".repeat(2500)}\n`).label).toBe("5,000 / 16,000 · 2 parts");
+  });
+});
+
+describe("foldedLabel", () => {
+  const same = (text: string) => mergeReadings({ 1: text, 2: text, 3: text }, text.split("\n").length);
+
+  it("counts chosen spans in stanzas", () => {
+    const text = "a b\n\nc d\n\ne f";
+    const other = "a X1\n\nc Y1\n\ne f";
+    const merged = mergeReadings({ 1: "a x\n\nc y\n\ne f", 2: other, 3: other }, 5);
+    expect(spanCount(merged)).toBe(2);
+    expect(foldedLabel(text, merged, 1)).toBe("3 stanzas · 1 of 2 chosen");
+  });
+
+  it("says all agree for lines with no spans", () => {
+    const text = "a b\nc d\ne f\ng h";
+    expect(foldedLabel(text, same(text), 0)).toBe("4 lines · all agree");
+  });
+
+  it("names the words and readings that came back", () => {
+    const text = "a b c d e";
+    expect(foldedLabel(text, mergeReadings({ 1: text, 3: text }, 1), 0)).toBe(
+      "5 words · 2 of 3 readings came back",
+    );
+  });
+
+  it("uses the singular for a single line and word", () => {
+    expect(foldedLabel("a", same("a"), 0)).toBe("1 word · all agree");
+    expect(foldedLabel("a b", same("a b"), 0)).toBe("2 words · all agree");
+  });
+
+  it("warns when lines may be missing", () => {
+    const text = "a b\nc d";
+    const merged = mergeReadings({ 1: "a b", 2: "a b", 3: "a b" }, 2);
+    expect(foldedLabel(text, merged, 0)).toBe("2 lines · lines may be missing");
   });
 });
 

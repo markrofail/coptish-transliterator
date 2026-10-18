@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lineText, mergedText, mergeReadings } from "@/lib/merge-readings";
+import { isIncomplete, lineText, mergedText, mergeReadings, spanCount } from "@/lib/merge-readings";
 
 const w = (text: string) => ({ kind: "word", text });
 
@@ -295,5 +295,21 @@ describe("lineText and mergedText", () => {
     const other = "a X1 b Y1\nc Z1";
     const merged = mergeReadings({ 1: "a x b y\nc z", 2: other, 3: other }, 2);
     expect(mergedText(merged, { "0:1": 1 })).toBe("a X1 b y\nc Z1");
+  });
+});
+
+describe("spanCount and isIncomplete", () => {
+  it("counts the spans on every line", () => {
+    const other = "a X1 b Y1\nc Z1";
+    expect(spanCount(mergeReadings({ 1: "a x b y\nc z", 2: other, 3: other }, 2))).toBe(3);
+    expect(spanCount(mergeReadings({ 1: "a b", 2: "a b" }, 1))).toBe(0);
+  });
+
+  it("is true for the fallback when no reading had the right line count", () => {
+    expect(isIncomplete(mergeReadings({ 1: "a\nb", 2: "a" }, 3), 3)).toBe(true);
+  });
+
+  it("is false for a normal merge", () => {
+    expect(isIncomplete(mergeReadings({ 1: "a\nb", 2: "a\nb" }, 2), 2)).toBe(false);
   });
 });

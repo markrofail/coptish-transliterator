@@ -161,3 +161,12 @@ export function lineText(line: readonly Token[], choices: Choices): string {
 export function mergedText(merged: Merged, choices: Choices): string {
   return merged.lines.map((line) => lineText(line, choices)).join("\n");
 }
+
+export function spanCount(merged: Merged): number {
+  return merged.lines.flat().filter((token) => token.kind === "span").length;
+}
+
+// No reading had the input's line count, so the merge fell back to one reading's own lines.
+export function isIncomplete(merged: Merged, inputLineCount: number): boolean {
+  return merged.lines.length !== inputLineCount;
+}
