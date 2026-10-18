@@ -7,7 +7,8 @@ export const MODEL = "gemini-3.5-flash-lite";
 export type GeminiConfig = { model: string; thinkingLevel: ThinkingLevel };
 
 // gemini-3.8-flash scored better but its free tier allows only 20 requests a day per project.
-export const DEFAULT_CONFIG: GeminiConfig = { model: MODEL, thinkingLevel: ThinkingLevel.MINIMAL };
+// Low thinking beat minimal on the held-out pairs (63% exact / 98.5% chars against 63% / 97.7%).
+export const DEFAULT_CONFIG: GeminiConfig = { model: MODEL, thinkingLevel: ThinkingLevel.LOW };
 
 const RESPONSE_SCHEMA = {
   type: "object",

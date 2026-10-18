@@ -63,12 +63,12 @@ describe("transliterate", () => {
         properties: { latin: { type: "string" } },
         required: ["latin"],
       },
-      thinkingConfig: { thinkingLevel: "MINIMAL" },
+      thinkingConfig: { thinkingLevel: "LOW" },
     });
   });
 
-  it("defaults to the production model and minimal thinking", () => {
-    expect(DEFAULT_CONFIG).toEqual({ model: MODEL, thinkingLevel: "MINIMAL" });
+  it("defaults to the production model and low thinking", () => {
+    expect(DEFAULT_CONFIG).toEqual({ model: MODEL, thinkingLevel: "LOW" });
   });
 
   it("uses a custom model and thinking level when given, and logs that model", async () => {
