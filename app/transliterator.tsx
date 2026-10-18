@@ -68,7 +68,7 @@ export function Transliterator() {
     setRunId((id) => id + 1);
     setPhase({ kind: "loading", sentText: raw, rows: skeletonRows(input.text, charsPerRow()) });
 
-    const result = await requestTransliteration(input.text, fetch, controller.signal);
+    const result = await requestTransliteration(input.text, 1, fetch, controller.signal);
     if (result.ok) {
       setPhase({ kind: "done", latin: result.latin });
     } else if (!result.aborted) {

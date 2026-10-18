@@ -1,3 +1,5 @@
+import type { Reading } from "@/lib/readings";
+
 export const RATE_LIMITED_MESSAGE = "Too many requests, try again shortly.";
 export const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again.";
 
@@ -14,6 +16,7 @@ function failure(message: string, retryable: boolean): ClientResult {
 
 export async function requestTransliteration(
   text: string,
+  reading: Reading,
   fetchImpl: typeof fetch = fetch,
   signal?: AbortSignal,
 ): Promise<ClientResult> {
@@ -22,7 +25,7 @@ export async function requestTransliteration(
     response = await fetchImpl("/api/transliterate", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, reading }),
       signal,
     });
   } catch {

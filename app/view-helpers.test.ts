@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { SKELETON_MAX_ROWS, counterState, lineDelayMs, skeletonRows } from "@/app/view-helpers";
+import {
+  SKELETON_MAX_ROWS,
+  counterState,
+  lineDelayMs,
+  readingsBackLabel,
+  readingsNote,
+  skeletonRows,
+} from "@/app/view-helpers";
 
 const a = (n: number) => "ⲁ".repeat(n);
 
@@ -52,5 +59,23 @@ describe("counterState", () => {
 describe("lineDelayMs", () => {
   it("staggers lines by 40ms and caps at 480ms", () => {
     expect([0, 1, 12, 40].map(lineDelayMs)).toEqual([0, 40, 480, 480]);
+  });
+});
+
+describe("readingsBackLabel", () => {
+  it("counts the readings that came back", () => {
+    expect(readingsBackLabel({ 1: "back", 2: "waiting", 3: "failed" })).toBe("1 of 3 back");
+  });
+});
+
+describe("readingsNote", () => {
+  it("says what the reader can do with the readings", () => {
+    expect(readingsNote(3, 0, 0)).toBe("All 3 readings agree");
+    expect(readingsNote(3, 2, 0)).toBe("2 words where the readings disagree · tap one to choose");
+    expect(readingsNote(3, 1, 0)).toBe("1 word where the readings disagree · tap it to choose");
+    expect(readingsNote(3, 2, 1)).toBe("1 of 2 chosen");
+    expect(readingsNote(2, 1, 0)).toBe("2 of 3 readings came back · 1 word where the readings disagree · tap it to choose");
+    expect(readingsNote(2, 0, 0)).toBe("2 of 3 readings came back · they agree");
+    expect(readingsNote(1, 0, 0)).toBe("1 of 3 readings came back");
   });
 });

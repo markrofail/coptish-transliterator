@@ -1,4 +1,6 @@
 import { MAX_INPUT_LENGTH } from "@/lib/validate";
+import type { Statuses } from "@/app/settle-readings";
+import { READING_NUMBERS } from "@/lib/readings";
 
 export const SKELETON_MAX_ROWS = 40;
 
@@ -41,4 +43,22 @@ export function counterState(text: string): CounterState {
 
 export function lineDelayMs(index: number): number {
   return Math.min(index * 40, 480);
+}
+
+export function readingsBackLabel(statuses: Statuses): string {
+  const back = READING_NUMBERS.filter((reading) => statuses[reading] === "back").length;
+  return `${back} of 3 back`;
+}
+
+/** The note under the output: what the reader can do with the readings. */
+export function readingsNote(mergedCount: number, spans: number, chosen: number): string {
+  if (mergedCount === 1) return "1 of 3 readings came back";
+  const prefix = mergedCount === 2 ? "2 of 3 readings came back · " : "";
+  if (spans === 0) return mergedCount === 2 ? `${prefix}they agree` : "All 3 readings agree";
+  if (chosen > 0) return `${chosen} of ${spans} chosen`;
+  const disagree =
+    spans === 1
+      ? "1 word where the readings disagree · tap it to choose"
+      : `${spans} words where the readings disagree · tap one to choose`;
+  return prefix + disagree;
 }
