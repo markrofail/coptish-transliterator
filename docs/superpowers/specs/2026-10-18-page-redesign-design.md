@@ -128,6 +128,8 @@ Spacing uses DESIGN.md's scale: 2, 4, 8, 12, 16, 22, 58, 68.
 
 ### Output
 
+The output's header, text and choosing now follow `2026-10-18-three-readings-design.md`, section 7. The rest of this section still applies.
+
 - **Position:** below the input box, 36px gap on phone and 58px on desktop. A 1px ink rule sits on top of a header row: a "Latin" mono label on the left and a **Copy** ghost button on the right.
 - **Skeleton, while loading:**
   - Show one bar per line of input. Each bar is as wide as its line, relative to the longest line, with a minimum of 28% width.

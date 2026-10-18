@@ -7,14 +7,31 @@ import { ExampleList } from "@/app/example-list";
 import type { Example } from "@/app/examples";
 import { OutputPanel } from "@/app/output-panel";
 import { requestTransliteration } from "@/app/request-transliteration";
+import {
+  settleReadings,
+  stragglerDelay,
+  type Results,
+  type Statuses,
+} from "@/app/settle-readings";
 import { skeletonRows } from "@/app/view-helpers";
+import type { Merged } from "@/lib/merge-readings";
+import { READING_NUMBERS } from "@/lib/readings";
 import { validateInput } from "@/lib/validate";
 
 type Phase =
   | { kind: "idle" }
-  | { kind: "loading"; sentText: string; rows: number[] }
-  | { kind: "done"; latin: string }
+  | { kind: "loading"; sentText: string; rows: number[]; statuses: Statuses }
+  | { kind: "done"; merged: Merged; statuses: Statuses }
   | { kind: "error"; message: string; retryable: boolean };
+
+// One press of Transliterate: three readings sharing one controller.
+type Run = {
+  controller: AbortController;
+  results: Results;
+  firstBackAt: number | null;
+  timer: ReturnType<typeof setTimeout> | null;
+  settled: boolean;
+};
 
 const DESKTOP = "(min-width: 768px)";
 
@@ -27,7 +44,7 @@ export function Transliterator() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLElement>(null);
-  const controllerRef = useRef<AbortController | null>(null);
+  const runRef = useRef<Run | null>(null);
   const lastSentRef = useRef("");
 
   const busy = phase.kind === "loading" && text === phase.sentText;
@@ -35,9 +52,10 @@ export function Transliterator() {
   useEffect(() => {
     // Only with a mouse or trackpad, so a phone keyboard doesn't pop up on load.
     if (matchMedia("(pointer: fine)").matches) textareaRef.current?.focus();
-    return () => controllerRef.current?.abort();
+    return () => stopRun();
   }, []);
 
+  // On a new run only: replies update the loading phase too, and shouldn't scroll the page back.
   useEffect(() => {
     if (phase.kind !== "loading" || !outputRef.current) return;
     const output = outputRef.current;
@@ -46,7 +64,7 @@ export function Transliterator() {
       const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
       output.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
     }
-  }, [phase]);
+  }, [runId]);
 
   function charsPerRow(): number {
     const width = columnRef.current?.clientWidth ?? 0;
@@ -54,25 +72,72 @@ export function Transliterator() {
     return Math.max(16, Math.floor(width / (fontPx * 0.5)));
   }
 
-  async function run(raw: string) {
-    controllerRef.current?.abort();
-    controllerRef.current = null;
+  // Cancels the run in progress, so none of its replies or its timer can touch the page.
+  function stopRun() {
+    const current = runRef.current;
+    if (!current) return;
+    current.controller.abort();
+    if (current.timer !== null) clearTimeout(current.timer);
+    runRef.current = null;
+  }
+
+  function run(raw: string) {
+    stopRun();
     const input = validateInput(raw);
     if (!input.ok) {
       setPhase({ kind: "error", message: input.message, retryable: false });
       return;
     }
-    const controller = new AbortController();
-    controllerRef.current = controller;
+    const current: Run = {
+      controller: new AbortController(),
+      results: {},
+      firstBackAt: null,
+      timer: null,
+      settled: false,
+    };
+    runRef.current = current;
     lastSentRef.current = raw;
+    const lineCount = input.text.split(/\r?\n/).length;
+    const rows = skeletonRows(input.text, charsPerRow());
     setRunId((id) => id + 1);
-    setPhase({ kind: "loading", sentText: raw, rows: skeletonRows(input.text, charsPerRow()) });
+    setPhase({
+      kind: "loading",
+      sentText: raw,
+      rows,
+      statuses: { 1: "waiting", 2: "waiting", 3: "waiting" },
+    });
 
-    const result = await requestTransliteration(input.text, 1, fetch, controller.signal);
-    if (result.ok) {
-      setPhase({ kind: "done", latin: result.latin });
-    } else if (!result.aborted) {
-      setPhase({ kind: "error", message: result.message, retryable: result.retryable });
+    function update(stopWaiting: boolean) {
+      if (runRef.current !== current || current.settled) return;
+      const settled = settleReadings(current.results, lineCount, stopWaiting);
+      if (settled.kind === "waiting") {
+        setPhase({ kind: "loading", sentText: raw, rows, statuses: settled.statuses });
+        const delay = stragglerDelay(current.results, current.firstBackAt, Date.now());
+        if (delay !== null && current.timer === null) {
+          current.timer = setTimeout(() => update(true), delay);
+        }
+        return;
+      }
+      current.settled = true;
+      if (current.timer !== null) clearTimeout(current.timer);
+      current.timer = null;
+      setPhase(
+        settled.kind === "done"
+          ? { kind: "done", merged: settled.merged, statuses: settled.statuses }
+          : settled,
+      );
+    }
+
+    for (const reading of READING_NUMBERS) {
+      const reply = requestTransliteration(input.text, reading, fetch, current.controller.signal);
+      reply.then((result) => {
+        // A reply from an older run, or one after the cut-off, is dropped.
+        if (runRef.current !== current || current.settled) return;
+        if (!result.ok && result.aborted) return;
+        current.results[reading] = result;
+        current.firstBackAt ??= Date.now();
+        update(false);
+      });
     }
   }
 
@@ -87,8 +152,7 @@ export function Transliterator() {
   }
 
   function handleClear() {
-    controllerRef.current?.abort();
-    controllerRef.current = null;
+    stopRun();
     setText("");
     setSelectedId(null);
     setPhase({ kind: "idle" });
