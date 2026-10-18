@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_INPUT_LENGTH, validateInput } from "@/lib/validate";
+import { MAX_INPUT_LENGTH, MAX_PASTE_LENGTH, validateInput } from "@/lib/validate";
 
 const COPTIC_LETTER = "ⲁ"; // U+2C81
 
@@ -22,6 +22,18 @@ describe("validateInput", () => {
     const tooLong = validateInput(COPTIC_LETTER.repeat(MAX_INPUT_LENGTH + 1));
     expect(tooLong.ok).toBe(false);
     if (!tooLong.ok) expect(tooLong.message).toContain("4001");
+  });
+
+  it("accepts 16,000 code points and rejects 16,001", () => {
+    expect(MAX_PASTE_LENGTH).toBe(16000);
+    expect(validateInput(COPTIC_LETTER.repeat(16000), MAX_PASTE_LENGTH).ok).toBe(true);
+    const tooLong = validateInput(COPTIC_LETTER.repeat(16001), MAX_PASTE_LENGTH);
+    expect(tooLong.ok).toBe(false);
+    if (!tooLong.ok) {
+      expect(tooLong.message).toBe(
+        "That's 16001 characters. The limit is 16000, so try a shorter passage.",
+      );
+    }
   });
 
   it("measures length after trimming", () => {

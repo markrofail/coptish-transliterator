@@ -1,20 +1,22 @@
 export const MAX_INPUT_LENGTH = 4000;
+// What the page accepts in one paste; longer ones are split into parts of at most MAX_INPUT_LENGTH.
+export const MAX_PASTE_LENGTH = 16000;
 
 // Letters only Coptic uses: the Coptic block, plus the Coptic letters in the Greek block (Ϣ…ϯ).
 const COPTIC_SPECIFIC = /[Ⲁ-⳿Ϣ-ϯ]/u;
 
 export type InputCheck = { ok: true; text: string } | { ok: false; message: string };
 
-export function validateInput(raw: string): InputCheck {
+export function validateInput(raw: string, limit: number = MAX_INPUT_LENGTH): InputCheck {
   const text = raw.trim();
   if (text === "") {
     return { ok: false, message: "Enter some Coptic text to transliterate." };
   }
   const length = [...text].length;
-  if (length > MAX_INPUT_LENGTH) {
+  if (length > limit) {
     return {
       ok: false,
-      message: `That's ${length} characters. The limit is ${MAX_INPUT_LENGTH}, so try a shorter passage.`,
+      message: `That's ${length} characters. The limit is ${limit}, so try a shorter passage.`,
     };
   }
   if (!COPTIC_SPECIFIC.test(text)) {
