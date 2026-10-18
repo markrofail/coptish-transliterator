@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+@theme inline {
+  --font-coptic: var(--font-noto-sans-coptic), sans-serif;
+}
