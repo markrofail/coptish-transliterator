@@ -88,6 +88,7 @@ Inputs: the readings that came back, keyed by reading number, plus the line coun
 
 - **Lines.** Split each reading on line breaks. A reading whose line count differs from the input's is left out of the merge (my call). Treat it like a failed request in the UI. If that leaves no reading, show the lowest-numbered reading that came back as plain text, with no marks.
 - **Words.** Within each line, split on whitespace and align the readings word by word with a standard sequence diff. A maximal run where they don't all agree becomes one **span**. A span can cover several words, for example *enneet e* against *enneeete*.
+- **Neighbouring disagreements (my call).** When every reading has the same number of words in such a run, split it into one span per word position instead, and leave any position they agree on as a plain word. This matches the mockup, where *evolha* and *pipethoou:* are marked and chosen separately.
 - **What counts as a disagreement (my call).** Compare words ignoring letter case and punctuation, so *Ethouab* against *ethouab*, or *pipethoou:* against *pipethoou*, is not marked. Where words agree, show the default reading's form.
 - **Alternatives.** Each span lists each reading's text for that run, which may be empty when a reading left a word out. Alternatives that are the same under the comparison above are combined into one (my call), shown in the form of the lowest-numbered reading that gave it, recording which readings gave it.
 - **Default.** The alternative given by the most readings. On a tie, use reading 1's alternative if reading 1 is present, otherwise the lowest-numbered reading's.
@@ -194,6 +195,7 @@ One run costs 48 requests (16 held-out pairs × 3). Keep the existing delay betw
 - Case- and punctuation-only differences aren't marked.
 - Default choice: the majority, and on a tie, reading 1.
 - Alternatives that differ only in case or punctuation are combined.
+- Neighbouring disagreements of equal length are split into one span per word.
 - The chooser is a listbox, not a radio group.
 - A reading with the wrong number of lines is left out.
 - A missing `reading` means 1, and an invalid one is a 400.
