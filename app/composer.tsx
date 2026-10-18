@@ -55,9 +55,10 @@ export function Composer({
         placeholder="Paste or type Coptic text"
         className="block max-h-[60vh] min-h-[200px] w-full resize-none border-0 bg-transparent px-[22px] pt-[22px] pb-2 font-coptic text-[22px] leading-[1.6] text-ink outline-none field-sizing-content placeholder:font-sans placeholder:text-[18px] placeholder:text-ink/60 md:min-h-[280px]"
       />
-      <div className="flex min-h-[68px] items-center justify-end gap-2 pt-2 pr-3 pb-3 pl-[22px]">
+      {/* On a phone, a long paste's counter takes its own line above the buttons. */}
+      <div className="flex min-h-[68px] flex-wrap items-center justify-end gap-2 pt-2 pr-3 pb-3 pl-[22px]">
         <span
-          className={`mr-auto font-mono text-[12px] leading-[1.4] ${
+          className={`mr-auto font-mono text-[12px] leading-[1.4] whitespace-nowrap ${
             counter.over ? "text-ink underline underline-offset-[3px]" : "text-ink/60"
           }`}
         >
