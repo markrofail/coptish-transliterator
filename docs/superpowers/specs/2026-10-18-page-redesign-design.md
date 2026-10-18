@@ -24,7 +24,7 @@ The user approved a clickable prototype during brainstorming: `docs/superpowers/
 
 **Non-goals**
 
-- Navbar or footer (the user's decision).
+- Navbar or footer (the user's decision). Later on 2026-10-18 the user asked for a nav bar: the Coptish logo, a "Transliterator" label, About and GitHub, plus an About page at `/about`. There's still no footer.
 - Dark mode. The page is light only (the user's decision).
 - Accent colors, including red for errors.
 - Streaming output. The output arrives whole, after a skeleton.

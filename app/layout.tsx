@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
+import { SiteNav } from "@/app/site-nav";
 import "./globals.css";
 
 // Stand-ins for Anthropic Sans and Anthropic Mono, which aren't publicly licensed.
@@ -35,7 +36,10 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       lang="en"
       className={`${hankenGrotesk.variable} ${jetBrainsMono.variable} ${csAvaVeni.variable}`}
     >
-      <body className="bg-paper font-sans text-ink antialiased">{children}</body>
+      <body className="bg-paper font-sans text-ink antialiased">
+        <SiteNav />
+        {children}
+      </body>
     </html>
   );
 }
