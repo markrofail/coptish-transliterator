@@ -1,5 +1,53 @@
 @import "tailwindcss";
 
+/* Tokens from DESIGN.md. The page is light only. */
+@theme {
+  --color-ink: #141413;
+  --color-paper: #faf9f5;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow-card:
+    rgba(0, 0, 0, 0.01) 0px 2px 2px 0px, rgba(0, 0, 0, 0.02) 0px 4px 4px 0px,
+    rgba(0, 0, 0, 0.04) 0px 16px 24px 0px;
+  --ease-brand: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-bar-pulse: bar-pulse 1.6s ease-in-out infinite;
+  --animate-line-rise: line-rise 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes bar-pulse {
+    50% {
+      opacity: 0.14;
+    }
+  }
+  @keyframes line-rise {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+}
+
 @theme inline {
-  --font-coptic: var(--font-noto-sans-coptic), sans-serif;
+  --font-sans: var(--font-hanken-grotesk), Arial, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-coptic: var(--font-cs-ava-veni), var(--font-hanken-grotesk), sans-serif;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    /* Without this, the infinite skeleton pulse would flicker at 1ms. */
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }
