@@ -3,17 +3,17 @@
 import { ThinkingLevel } from "@google/genai";
 import reference from "@/data/reference.json";
 import { scorePair, summarize, type PairScore } from "@/lib/eval-score";
-import { MODEL, transliterate, type GeminiConfig } from "@/lib/gemini";
+import { transliterate, type GeminiConfig } from "@/lib/gemini";
 import type { ReferencePair } from "@/lib/prompt";
 
 const SETUPS: { name: string; config: GeminiConfig }[] = [
-  { name: `${MODEL} minimal`, config: { model: MODEL, thinkingLevel: ThinkingLevel.MINIMAL } },
-  { name: `${MODEL} low`, config: { model: MODEL, thinkingLevel: ThinkingLevel.LOW } },
   { name: "gemini-3.8-flash low", config: { model: "gemini-3.8-flash", thinkingLevel: ThinkingLevel.LOW } },
+  { name: "gemini-3.5-flash-lite minimal", config: { model: "gemini-3.5-flash-lite", thinkingLevel: ThinkingLevel.MINIMAL } },
+  { name: "gemini-3.5-flash-lite low", config: { model: "gemini-3.5-flash-lite", thinkingLevel: ThinkingLevel.LOW } },
 ];
 
-// Spaces calls out to stay under free-tier requests-per-minute limits.
-const DELAY_MS = 4000;
+// Spaces calls out to stay under free-tier requests-per-minute limits (gemini-3.8-flash hit 429s at ~7/min).
+const DELAY_MS = 13000;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
