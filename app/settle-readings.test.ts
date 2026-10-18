@@ -112,6 +112,10 @@ describe("stragglerDelay", () => {
     expect(stragglerDelay({ 1: ok("a"), 2: ok("a") }, 1000, 12000)).toBe(0);
   });
 
+  it("waits without a deadline when only failures are back", () => {
+    expect(stragglerDelay({ 2: fail(), 3: fail() }, 1000, 20000)).toBeNull();
+  });
+
   it("has no deadline before anything is back or after all are", () => {
     expect(stragglerDelay({}, null, 0)).toBeNull();
     expect(stragglerDelay({ 1: ok("a"), 2: ok("a"), 3: ok("a") }, 1000, 2000)).toBeNull();

@@ -135,7 +135,8 @@ export function Transliterator() {
         if (runRef.current !== current || current.settled) return;
         if (!result.ok && result.aborted) return;
         current.results[reading] = result;
-        current.firstBackAt ??= Date.now();
+        // The straggler countdown starts from the first successful reading.
+        if (result.ok) current.firstBackAt ??= Date.now();
         update(false);
       });
     }

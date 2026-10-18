@@ -3,7 +3,7 @@ import { GENERIC_ERROR_MESSAGE, RATE_LIMITED_MESSAGE } from "@/app/request-trans
 import { mergeReadings, type Merged } from "@/lib/merge-readings";
 import { READING_NUMBERS, type Reading } from "@/lib/readings";
 
-/** How long to wait for the last reading, counted from when the first came back. */
+/** How long to wait for the last reading, counted from when the first successful one came back. */
 export const STRAGGLER_MS = 10000;
 
 export type ReadingStatus = "waiting" | "back" | "failed";
@@ -55,12 +55,18 @@ export function settleReadings(
   return { kind: "done", statuses, merged };
 }
 
-/** Milliseconds until the last reading is given up on, or null when no deadline applies. */
+/**
+ * Milliseconds until the last reading is given up on, or null when no deadline applies. The
+ * countdown runs only while exactly one reading is pending and at least one came back ok, so a
+ * slow request can't hold up readings already in hand. With only failures back, there is nothing
+ * in hand, so the page keeps waiting. `firstBackAt` is when the first ok reading came back.
+ */
 export function stragglerDelay(
   results: Results,
   firstBackAt: number | null,
   now: number,
 ): number | null {
-  if (firstBackAt === null || Object.keys(results).length !== 2) return null;
+  const back = Object.values(results);
+  if (firstBackAt === null || back.length !== 2 || !back.some((result) => result?.ok)) return null;
   return Math.max(0, firstBackAt + STRAGGLER_MS - now);
 }
