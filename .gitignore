@@ -17,8 +17,6 @@ next-env.d.ts
 .DS_Store
 npm-debug.log*
 
-# local Claude Code isolation state
-.claude-config/
+# local Claude Code state
 .claude/settings.local.json
-.cache/
 .superpowers/
