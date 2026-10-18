@@ -12,7 +12,8 @@ import { READING_NUMBERS } from "@/lib/readings";
 
 const PRIMARY =
   "inline-flex h-11 items-center gap-2 rounded-sm bg-ink px-4 text-[15px] font-medium whitespace-nowrap text-white transition-[opacity,transform] duration-200 ease-brand hover:opacity-86 active:scale-[0.98]";
-const LINK = "h-11 shrink-0 px-1 text-[15px] font-medium underline underline-offset-[3px]";
+// min-w-11: "Hide" alone is narrower than the 44px target.
+const LINK = "h-11 min-w-11 shrink-0 px-1 text-center text-[15px] font-medium underline underline-offset-[3px]";
 
 /** The output for a paste of more than one part: finished parts fold into rows, and the part on screen sits last. */
 export function HymnPanel({
@@ -57,14 +58,15 @@ export function HymnPanel({
   const done = parts.filter((entry) => entry.phase?.kind === "done").length;
   const allOpen = parts.every((entry) => entry.open);
 
-  async function copyAll(): Promise<boolean> {
+  // Both ways of copying start inside the press, before anything is awaited: iOS refuses
+  // clipboard writes made outside it.
+  function copyAll(): Promise<boolean> {
     const text = hymnText(parts);
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      return copyThroughTextBox(text);
-    }
+    if (!navigator.clipboard?.writeText) return Promise.resolve(copyThroughTextBox(text));
+    return navigator.clipboard.writeText(text).then(
+      () => true,
+      () => copyThroughTextBox(text),
+    );
   }
 
   return (
@@ -228,23 +230,27 @@ function CurrentPart({
 }
 
 // No clipboard access. Folded parts aren't on the page to select by hand, so copy through a
-// hidden text box instead.
+// hidden text box instead. True only if the browser says the copy worked.
 function copyThroughTextBox(text: string): boolean {
   const box = document.createElement("textarea");
   box.value = text;
-  box.readOnly = true;
+  // Editable, since iOS often won't select a read-only box; 16px, so focusing it doesn't zoom
+  // the page; pinned in view, so selecting it doesn't scroll.
   box.style.position = "fixed";
+  box.style.top = "0";
+  box.style.left = "0";
+  box.style.fontSize = "16px";
   box.style.opacity = "0";
   const focused = document.activeElement;
   document.body.append(box);
-  box.select();
-  let copied = false;
   try {
-    copied = document.execCommand("copy");
+    box.select();
+    box.setSelectionRange(0, box.value.length);
+    return document.execCommand("copy");
   } catch {
-    copied = false;
+    return false;
+  } finally {
+    box.remove();
+    if (focused instanceof HTMLElement) focused.focus();
   }
-  box.remove();
-  if (focused instanceof HTMLElement) focused.focus();
-  return copied;
 }
