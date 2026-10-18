@@ -10,7 +10,7 @@ export type GeminiConfig = { model: string; thinkingLevel: ThinkingLevel; temper
 // gemini-3.8-flash scored better but its free tier allows only 20 requests a day per project.
 // Low thinking beat minimal on the held-out pairs (63% exact / 98.5% chars against 63% / 97.7%).
 // Readings 2 and 3 are sampled so the reader has something to choose between.
-export const SAMPLED_TEMPERATURE = 1;
+export const SAMPLED_TEMPERATURE = 0.7;
 
 export const READINGS: Record<Reading, GeminiConfig> = {
   1: { model: MODEL, thinkingLevel: ThinkingLevel.LOW, temperature: 0 },

@@ -86,7 +86,7 @@ describe("transliterate", () => {
 
   it("defines reading 1 as today's settings and readings 2 and 3 as sampled", () => {
     expect(READINGS[1]).toEqual({ model: "gemini-3.5-flash-lite", thinkingLevel: "LOW", temperature: 0 });
-    expect(SAMPLED_TEMPERATURE).toBe(1);
+    expect(SAMPLED_TEMPERATURE).toBe(0.7);
     for (const reading of [2, 3] as const) {
       expect(READINGS[reading]).toEqual({ ...READINGS[1], temperature: SAMPLED_TEMPERATURE });
     }

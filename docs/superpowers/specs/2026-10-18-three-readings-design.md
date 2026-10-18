@@ -57,7 +57,7 @@ Open the mockup in a browser. It's a static drawing of the six states at phone w
 **My call.** At temperature 0, three identical calls return nearly identical text, so the readings need different settings.
 
 - **Reading 1** uses today's settings exactly: `gemini-3.5-flash-lite`, low thinking, temperature 0. It's the anchor. With no disagreement, the page shows exactly what it shows today.
-- **Readings 2 and 3** use the same model, prompt and thinking level, at **temperature 1.0**, Gemini's default. They differ from each other only by sampling.
+- **Readings 2 and 3** use the same model, prompt and thinking level, at **temperature 0.7**, chosen with the evaluation (section 9). Temperature 1.0 failed the stop rule. They differ from each other only by sampling.
 - **Tune the temperature with the evaluation** (section 9). If the marks mostly fall on words reading 1 already got right, lower it. If the readings almost never disagree, raise it. Keep 2 and 3 at the same temperature.
 
 The settings live on the server in one table, indexed by reading number. The browser only sends the number.
@@ -189,7 +189,7 @@ One run costs 48 requests (16 held-out pairs × 3). Keep the existing delay betw
 
 ## 11. Calls I made (the user may want to check these)
 
-- Reading 1 stays exactly today's settings. Readings 2 and 3 run at temperature 1.0, to be tuned with the evaluation.
+- Reading 1 stays exactly today's settings. Readings 2 and 3 run at temperature 0.7, tuned with the evaluation.
 - The browser sends three requests, rather than one request that fans out on the server.
 - The text waits for all three, with a 10-second cut-off after the first returns. A straggler is ignored, not aborted.
 - Case- and punctuation-only differences aren't marked.
