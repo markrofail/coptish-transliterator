@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import reference from "@/data/reference.json";
+import { expandJinkim } from "@/lib/jinkim";
 import { buildPrompt, SYSTEM_INSTRUCTION, wrapCoptic, type ReferencePair } from "@/lib/prompt";
 import { validateInput } from "@/lib/validate";
 
@@ -115,13 +116,22 @@ describe("buildPrompt", () => {
     expect(JSON.stringify(prompt.contents)).not.toContain("Allilouia");
   });
 
+  it("spells out jinkims in the examples and in the user's text", () => {
+    const { contents } = buildPrompt("ⲛ̀ⲧⲉ", [{ coptic: "ⲙ̀ⲫ̀ⲓⲱⲧ", latin: "emefyot", split: "example" }]);
+    expect(contents[0]).toEqual({ role: "user", parts: [{ text: wrapCoptic("ⲉⲙⲉⲫⲓⲱⲧ") }] });
+    expect(contents.at(-1)).toEqual({ role: "user", parts: [{ text: wrapCoptic("ⲉⲛⲧⲉ") }] });
+  });
+
   it("uses the system instruction and every example in data/reference.json by default", () => {
     const examples = (reference as ReferencePair[]).filter((pair) => pair.split === "example");
     const { systemInstruction, contents } = buildPrompt("ϯ");
     expect(systemInstruction).toBe(SYSTEM_INSTRUCTION);
     expect(contents).toHaveLength(examples.length * 2 + 1);
     for (const pair of examples) {
-      expect(contents).toContainEqual({ role: "user", parts: [{ text: wrapCoptic(pair.coptic) }] });
+      expect(contents).toContainEqual({
+        role: "user",
+        parts: [{ text: wrapCoptic(expandJinkim(pair.coptic)) }],
+      });
       expect(contents).toContainEqual({
         role: "model",
         parts: [{ text: JSON.stringify({ latin: pair.latin }) }],

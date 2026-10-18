@@ -1,4 +1,5 @@
 import reference from "@/data/reference.json";
+import { expandJinkim } from "@/lib/jinkim";
 
 export type ReferencePair = {
   coptic: string;
@@ -66,9 +67,9 @@ export function buildPrompt(
   const contents = pairs
     .filter((pair) => pair.split === "example")
     .flatMap((pair): Turn[] => [
-      { role: "user", parts: [{ text: wrapCoptic(pair.coptic) }] },
+      { role: "user", parts: [{ text: wrapCoptic(expandJinkim(pair.coptic)) }] },
       { role: "model", parts: [{ text: JSON.stringify({ latin: pair.latin }) }] },
     ]);
-  contents.push({ role: "user", parts: [{ text: wrapCoptic(text) }] });
+  contents.push({ role: "user", parts: [{ text: wrapCoptic(expandJinkim(text)) }] });
   return { systemInstruction: SYSTEM_INSTRUCTION, contents };
 }
