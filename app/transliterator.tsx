@@ -20,7 +20,7 @@ export function Transliterator() {
     const result = await requestTransliteration(inputText);
     if (result.ok) {
       setOutputText(result.latin);
-    } else {
+    } else if (!result.aborted) {
       setError(result.message);
     }
     setIsLoading(false);

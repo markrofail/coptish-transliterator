@@ -1,11 +1,21 @@
 export const RATE_LIMITED_MESSAGE = "Too many requests, try again shortly.";
 export const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again.";
 
-export type ClientResult = { ok: true; latin: string } | { ok: false; message: string };
+export type ClientResult =
+  | { ok: true; latin: string }
+  | { ok: false; aborted: false; message: string; retryable: boolean }
+  | { ok: false; aborted: true };
+
+const ABORTED: ClientResult = { ok: false, aborted: true };
+
+function failure(message: string, retryable: boolean): ClientResult {
+  return { ok: false, aborted: false, message, retryable };
+}
 
 export async function requestTransliteration(
   text: string,
   fetchImpl: typeof fetch = fetch,
+  signal?: AbortSignal,
 ): Promise<ClientResult> {
   let response: Response;
   try {
@@ -13,20 +23,23 @@ export async function requestTransliteration(
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ text }),
+      signal,
     });
   } catch {
-    return { ok: false, message: GENERIC_ERROR_MESSAGE };
+    return signal?.aborted ? ABORTED : failure(GENERIC_ERROR_MESSAGE, true);
   }
+  if (signal?.aborted) return ABORTED;
   if (response.status === 429) {
-    return { ok: false, message: RATE_LIMITED_MESSAGE };
+    return failure(RATE_LIMITED_MESSAGE, true);
   }
 
   let body: unknown;
   try {
     body = await response.json();
   } catch {
-    return { ok: false, message: GENERIC_ERROR_MESSAGE };
+    return signal?.aborted ? ABORTED : failure(GENERIC_ERROR_MESSAGE, true);
   }
+  if (signal?.aborted) return ABORTED;
   if (response.ok && isRecord(body) && typeof body.latin === "string") {
     return { ok: true, latin: body.latin };
   }
@@ -36,9 +49,9 @@ export async function requestTransliteration(
     body.error.code === "invalid_input" &&
     typeof body.error.message === "string"
   ) {
-    return { ok: false, message: body.error.message };
+    return failure(body.error.message, false);
   }
-  return { ok: false, message: GENERIC_ERROR_MESSAGE };
+  return failure(GENERIC_ERROR_MESSAGE, true);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

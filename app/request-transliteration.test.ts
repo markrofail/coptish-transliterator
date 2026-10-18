@@ -28,7 +28,12 @@ describe("requestTransliteration", () => {
     const fetchImpl = respondWith(
       Response.json({ error: { code: "invalid_input", message } }, { status: 400 }),
     );
-    await expect(requestTransliteration(" ", fetchImpl)).resolves.toEqual({ ok: false, message });
+    await expect(requestTransliteration(" ", fetchImpl)).resolves.toEqual({
+      ok: false,
+      aborted: false,
+      message,
+      retryable: false,
+    });
   });
 
   it("shows the rate-limit message for any 429", async () => {
@@ -38,7 +43,9 @@ describe("requestTransliteration", () => {
     ]) {
       await expect(requestTransliteration("Ⲁⲙⲏⲛ", respondWith(response))).resolves.toEqual({
         ok: false,
+        aborted: false,
         message: RATE_LIMITED_MESSAGE,
+        retryable: true,
       });
     }
   });
@@ -49,7 +56,9 @@ describe("requestTransliteration", () => {
     );
     await expect(requestTransliteration("Ⲁⲙⲏⲛ", fetchImpl)).resolves.toEqual({
       ok: false,
+      aborted: false,
       message: GENERIC_ERROR_MESSAGE,
+      retryable: true,
     });
   });
 
@@ -63,19 +72,60 @@ describe("requestTransliteration", () => {
     );
     await expect(requestTransliteration("Ⲁⲙⲏⲛ", htmlTimeout)).resolves.toEqual({
       ok: false,
+      aborted: false,
       message: GENERIC_ERROR_MESSAGE,
+      retryable: true,
     });
     const offline = vi.fn<typeof fetch>().mockRejectedValue(new TypeError("Failed to fetch"));
     await expect(requestTransliteration("Ⲁⲙⲏⲛ", offline)).resolves.toEqual({
       ok: false,
+      aborted: false,
       message: GENERIC_ERROR_MESSAGE,
+      retryable: true,
     });
   });
 
   it("shows the generic message for a 200 without a latin string", async () => {
     await expect(requestTransliteration("Ⲁⲙⲏⲛ", respondWith(Response.json({})))).resolves.toEqual({
       ok: false,
+      aborted: false,
       message: GENERIC_ERROR_MESSAGE,
+      retryable: true,
+    });
+  });
+
+  it("passes the abort signal to fetch", async () => {
+    const fetchImpl = respondWith(Response.json({ latin: "Amin" }));
+    const { signal } = new AbortController();
+    await requestTransliteration("Ⲁⲙⲏⲛ", fetchImpl, signal);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "/api/transliterate",
+      expect.objectContaining({ signal }),
+    );
+  });
+
+  it("reports a cancelled request as aborted, not as an error", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockRejectedValue(new DOMException("Aborted", "AbortError"));
+    await expect(requestTransliteration("Ⲁⲙⲏⲛ", fetchImpl, controller.signal)).resolves.toEqual({
+      ok: false,
+      aborted: true,
+    });
+  });
+
+  // Review Focus 1
+  it("reports a reply that arrives after cancelling as aborted", async () => {
+    const controller = new AbortController();
+    const fetchImpl = vi.fn<typeof fetch>(async () => {
+      controller.abort();
+      return Response.json({ latin: "Amin" });
+    });
+    await expect(requestTransliteration("Ⲁⲙⲏⲛ", fetchImpl, controller.signal)).resolves.toEqual({
+      ok: false,
+      aborted: true,
     });
   });
 });
