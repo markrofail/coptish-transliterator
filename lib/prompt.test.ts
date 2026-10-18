@@ -6,13 +6,33 @@ import { validateInput } from "@/lib/validate";
 const NON_LATIN = /[Ͱ-ϿⲀ-⳿]/u;
 
 describe("data/reference.json", () => {
-  it("holds 10 example pairs of valid Coptic and Coptic-free Latin", () => {
+  it("holds 14 example and 7 held-out pairs of valid Coptic and Coptic-free Latin", () => {
     const pairs = reference as ReferencePair[];
-    expect(pairs.filter((pair) => pair.split === "example")).toHaveLength(10);
+    expect(pairs.filter((pair) => pair.split === "example")).toHaveLength(14);
+    expect(pairs.filter((pair) => pair.split === "heldout")).toHaveLength(7);
     for (const pair of pairs) {
       expect(validateInput(pair.coptic).ok, pair.coptic).toBe(true);
       expect(pair.latin, pair.latin).not.toMatch(NON_LATIN);
       expect(pair.latin.split("\n"), pair.latin).toHaveLength(pair.coptic.split("\n").length);
+    }
+  });
+
+  it("spells pairs by the iteration 2 conventions", () => {
+    const latin = (reference as ReferencePair[]).map((pair) => pair.latin);
+    for (const expected of [
+      "Pikhristos aftonf\nKhen oumethmee aftonf",
+      "Tihireenee ente Efnouti",
+      "Aghios o Theos",
+      "Tenouosht emmok o Pikhristos",
+      "Thok te tigom",
+      "Khen efran emefyot",
+      "Je thok te timetouro nem tigom",
+      "Khen Pikhristos Isos Penchois.",
+    ]) {
+      expect(latin, expected).toContain(expected);
+    }
+    for (const spelling of latin) {
+      expect(spelling, spelling).not.toMatch(/\p{L}-\p{L}/u);
     }
   });
 });
@@ -34,11 +54,23 @@ describe("SYSTEM_INSTRUCTION", () => {
       "ⲟⲩ → ou",
       "ⲁⲩ → av",
       "ⲉⲩ → ev",
-      "ⲏⲓ → i",
+      "ⲏⲓ → ee",
       "ⲅ before ⲅ, ⲕ, ⲝ or ⲭ → n",
       "Jinkim",
       "unless the letter before it is a vowel",
       "Ⲁⲙⲏⲛ → Amen",
+      "Kirie eleison",
+      "ⲃ → v before a vowel",
+      "ⲱ → o",
+      "ⲑⲱⲕ → thok",
+      "ⲇ → th",
+      "ⲅ → gh",
+      "ⲭⲁ → ka",
+      "ⲡⲉⲛⲓⲱⲧ → penyot",
+      "ϣⲏⲣⲓ → sheeri",
+      "Ⲡⲭ̅ⲥ̅ → Pikhristos",
+      "Never put a hyphen inside a word",
+      "Check before replying",
     ]) {
       expect(SYSTEM_INSTRUCTION, rule).toContain(rule);
     }

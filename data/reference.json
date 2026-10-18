@@ -1,12 +1,23 @@
 [
-  {"coptic": "Ⲡⲓⲭ̀ⲣⲓⲥⲧⲟⲥ ⲁϥⲧⲱⲛϥ\nϦⲉⲛ ⲟⲩⲙⲉⲑⲙⲏⲓ ⲁϥⲧⲱⲛϥ", "latin": "Pikhristos aftonf\nKhen oumethmi aftonf", "split": "example"},
+  {"coptic": "Ⲡⲓⲭ̀ⲣⲓⲥⲧⲟⲥ ⲁϥⲧⲱⲛϥ\nϦⲉⲛ ⲟⲩⲙⲉⲑⲙⲏⲓ ⲁϥⲧⲱⲛϥ", "latin": "Pikhristos aftonf\nKhen oumethmee aftonf", "split": "example"},
   {"coptic": "Ⲭⲉⲣⲉ ⲛⲉ Ⲙⲁⲣⲓⲁ", "latin": "Shere ne Maria", "split": "example"},
   {"coptic": "Ⲁⲙⲏⲛ", "latin": "Amen", "split": "example"},
   {"coptic": "Ⲕⲩⲣⲓⲉ ⲉ̀ⲗⲉⲏ̀ⲥⲟⲛ", "latin": "Kirie eleison", "split": "example"},
   {"coptic": "Ⲁⲗⲗⲏⲗⲟⲩⲓⲁ", "latin": "Alleluia", "split": "example"},
-  {"coptic": "Ϯϩⲓⲣⲏⲛⲏ ⲛ̀ⲧⲉ Ⲫ̀ⲛⲟⲩϯ", "latin": "Tihirini ente Efnouti", "split": "example"},
+  {"coptic": "Ϯϩⲓⲣⲏⲛⲏ ⲛ̀ⲧⲉ Ⲫ̀ⲛⲟⲩϯ", "latin": "Tihireenee ente Efnouti", "split": "example"},
   {"coptic": "Ⲡ̀ϭⲟⲓⲥ ⲛⲁⲓ ⲛⲁⲛ", "latin": "Epchois nai nan", "split": "example"},
-  {"coptic": "Ⲁⲅⲓⲟⲥ ⲟ̀ Ⲑⲉⲟⲥ", "latin": "Agios o Theos", "split": "example"},
+  {"coptic": "Ⲁⲅⲓⲟⲥ ⲟ̀ Ⲑⲉⲟⲥ", "latin": "Aghios o Theos", "split": "example"},
   {"coptic": "Ⲧⲉⲛⲟⲩⲱϣⲧ ⲙ̀ⲙⲟⲕ ⲱ̀ Ⲡⲓⲭ̀ⲣⲓⲥⲧⲟⲥ", "latin": "Tenouosht emmok o Pikhristos", "split": "example"},
-  {"coptic": "Ⲑⲱⲕ ⲧⲉ ϯϫⲟⲙ", "latin": "Thok te tigom", "split": "example"}
+  {"coptic": "Ⲑⲱⲕ ⲧⲉ ϯϫⲟⲙ", "latin": "Thok te tigom", "split": "example"},
+  {"coptic": "Ϧⲉⲛ ⲫ̀ⲣⲁⲛ ⲙ̀ⲫ̀ⲓⲱⲧ", "latin": "Khen efran emefyot", "split": "example"},
+  {"coptic": "ⲛⲉⲙ ⲡ̀ϣⲏⲣⲓ", "latin": "nem epsheeri", "split": "example"},
+  {"coptic": "ⲛⲉⲙ Ⲡⲓⲡⲛⲉⲩⲙⲁ ⲉⲑⲟⲩⲁⲃ", "latin": "nem Pipnevma ethouab", "split": "example"},
+  {"coptic": "ⲟⲩⲛⲟⲩϯ ⲛ̀ⲟⲩⲱⲧ Ⲁⲙⲏⲛ.", "latin": "ounouti enouot Amen.", "split": "example"},
+  {"coptic": "Ϫⲉ ⲡⲉⲛⲓⲱⲧ ⲉⲧϧⲉⲛ ⲛⲓⲫⲏⲟⲩⲓ: ⲙⲁⲣⲉϥⲧⲟⲩⲃⲟ ⲛ̀ϫⲉ ⲡⲉⲕⲣⲁⲛ: ⲙⲁⲣⲉⲥⲓ ⲛ̀ϫⲉ ⲧⲉⲕⲙⲉⲧⲟⲩⲣⲟ: ⲡⲉⲧⲉϩⲛⲁⲕ ⲙⲁⲣⲉϥϣⲱⲡⲓ", "latin": "Je penyot etkhen nifeeoui: mareftouvo enje pekran: maresi enje tekmetouro: petehnak marefshopi", "split": "heldout"},
+  {"coptic": "Ⲙ̀ⲫⲣⲏϯ ϧⲉⲛ ⲧ̀ⲫⲉ ⲛⲉⲙ ϩⲓϫⲉⲛ ⲡⲓⲕⲁϩⲓ: ⲡⲉⲛⲱⲓⲕ ⲛ̀ⲧⲉ ⲣⲁⲥϯ ⲙⲏⲓϥ ⲛⲁⲛ ⲙ̀ⲫⲟⲟⲩ:", "latin": "Emfreeti khen etfe nem hijen pikahi: penoik ente rasti meef nan emfoou:", "split": "heldout"},
+  {"coptic": "Ⲟⲩⲟϩ ⲭⲁ ⲛⲏⲉⲧⲉⲣⲟⲛ ⲛⲁⲛ ⲉ̀ⲃⲟⲗ: ⲙ̀ⲫ̀ⲣⲏϯ ϩⲱⲛ ⲛ̀ⲧⲉⲛⲭⲱ ⲉ̀ⲃⲟⲗ ⲛ̀ⲛⲏⲉⲧⲉ ⲟⲩⲟⲛ ⲛ̀ⲧⲁⲛ ⲉⲣⲱⲟⲩ:", "latin": "Ouoh ka neeeteron nan evol: emefreeti hon entenko evol enneeete ouon entan eroou:", "split": "heldout"},
+  {"coptic": "Ⲟⲩⲟϩ ⲙ̀ⲡⲉⲣⲉⲛⲧⲉⲛ ⲉϧⲟⲩⲛ ⲉ̀ⲡⲓⲣⲁⲥⲙⲟⲥ: ⲁⲗⲗⲁ ⲛⲁϩⲙⲉⲛ ⲉⲃⲟⲗϩⲁ ⲡⲓⲡⲉⲧϩⲱⲟⲩ:", "latin": "Ouoh emperenten ekhoun epirasmos: alla nahmen evolha pipethoou:", "split": "heldout"},
+  {"coptic": "Ϧⲉⲛ Ⲡⲭ̅ⲥ̅ Ⲓⲏ̅ⲥ̅ Ⲡⲉⲛⲟ̅ⲥ̅.", "latin": "Khen Pikhristos Isos Penchois.", "split": "heldout"},
+  {"coptic": "Ϫⲉ ⲑⲱⲕ ⲧⲉ ϯⲙⲉⲧⲟⲩⲣⲟ ⲛⲉⲙ ϯϫⲟⲙ", "latin": "Je thok te timetouro nem tigom", "split": "heldout"},
+  {"coptic": "ⲛⲉⲙ ⲡⲓⲱⲟⲩ ϣⲁ ⲉⲛⲉϩ. Ⲁⲙⲏⲛ.", "latin": "nem pioou sha eneh. Amen.", "split": "heldout"}
 ]
