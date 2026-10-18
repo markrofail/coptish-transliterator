@@ -16,9 +16,11 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 // Unicode Coptic font with no Latin glyphs, so it is applied to Coptic text only.
+// Not preloaded: it is a 400 KB TTF, and phones show no Coptic until text is entered.
 const csAvaVeni = localFont({
   src: "./fonts/CSAvaVeni-Regular.ttf",
   variable: "--font-cs-ava-veni",
+  preload: false,
 });
 
 export const metadata: Metadata = {
