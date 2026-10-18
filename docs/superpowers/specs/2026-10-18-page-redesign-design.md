@@ -101,6 +101,8 @@ Spacing uses DESIGN.md's scale: 2, 4, 8, 12, 16, 22, 58, 68.
 
 ### Input box
 
+For a paste over 4,000 characters, the counter and the button now follow `2026-10-18-long-hymns-design.md`, section 6. The rest of this section still applies.
+
 - One bordered container: 1px ink border, 16px radius, paper background. When anything inside has focus, it gets a 2px ink outline with a 2px offset.
 - **Textarea:** borderless, `lang="cop"`, spellcheck off. It has a visually hidden label "Coptic text" and the placeholder "Paste or type Coptic text" in the sans font at 18px, ink-60. Minimum height is 200px on phone and 280px on desktop. It grows with its content up to 60% of the viewport height, then scrolls.
 - **Bottom bar inside the box**, 68px tall, laid out left to right:
@@ -129,6 +131,8 @@ Spacing uses DESIGN.md's scale: 2, 4, 8, 12, 16, 22, 58, 68.
 ### Output
 
 The output's header, text and choosing now follow `2026-10-18-three-readings-design.md`, section 7. The rest of this section still applies.
+
+A paste over 4,000 characters is walked through part by part, with finished parts folding into rows, as `2026-10-18-long-hymns-design.md`, section 6, describes.
 
 - **Position:** below the input box, 36px gap on phone and 58px on desktop. A 1px ink rule sits on top of a header row: a "Latin" mono label on the left and a **Copy** ghost button on the right.
 - **Skeleton, while loading:**
